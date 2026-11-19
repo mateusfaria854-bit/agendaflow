@@ -7,7 +7,7 @@ on:
 jobs:
   verificacao:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    timeout-minutes: 15
     env:
       DATABASE_URL: postgresql://agendaflow:agendaflow_local@localhost:5432/agendaflow
     services:
@@ -31,12 +31,17 @@ jobs:
           node-version: '22'
       - name: Instalar dependências dos workspaces
         run: npm install --no-audit --no-fund
-      - name: Validar specs, arquitetura, build e testes
-        run: npm run check
+      - name: Verificar especificações, fronteiras e compilação
+        run: |
+          npm run spec:check
+          npm run arch:check
+          npm run build
       - name: Aplicar migrações e seed fictício
         run: |
           npm run db:migrate
           npm run db:seed
           npm run db:seed
+      - name: Testes unitários e integração da API
+        run: npm test
       - name: Verificar integridade das reservas no PostgreSQL
         run: npm run db:verify

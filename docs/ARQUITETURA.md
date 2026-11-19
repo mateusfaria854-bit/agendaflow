@@ -2,7 +2,7 @@
 
 ## Visão geral
 
-O produto será desenvolvido incrementalmente para um único negócio de serviços. A Fase 0 disponibiliza somente uma prévia do frontend e uma API de monitoramento. As operações reais de autenticação, catálogo e reservas pertencem às próximas especificações.
+O produto será desenvolvido incrementalmente para um único negócio de serviços. A Fase 0 preparou a infraestrutura e os dados. A Fase 1 inclui cadastro/login e catálogo com persistência no PostgreSQL. O calendário permanece conceitual; operações reais de reserva pertencem às próximas especificações.
 
 ```text
 React + TypeScript (apps/web)
@@ -44,7 +44,7 @@ agendaflow/
 | Camada | Responsabilidade | Não deve fazer |
 |---|---|---|
 | `apps/web` | Componentes, estado visual, formulários e UX | Acessar banco diretamente ou decidir autorização |
-| `apps/api` | HTTP, validação, autenticação futura e regras transacionais | Confiar somente nas validações do navegador |
+| `apps/api` | HTTP, autenticação, autorização, catálogo e regras transacionais | Confiar somente nas validações do navegador |
 | `packages/shared` | Contratos e funções puras comuns | Importar Fastify, React, banco, `window` ou `document` |
 | PostgreSQL | Persistência, integridade referencial e restrição de conflitos | Assumir regras de interface ou apresentação |
 
@@ -63,8 +63,18 @@ O teste `db:verify` tenta inserir reservas concorrentes sobrepostas e exige o er
 | `GET /api/v1/health` | `200 {status:"ok",service:"agendaflow-api",version:"0.1.0"}` | Não |
 | `GET /api/v1/ready` | `200 {status:"ready"}` ou `503 {status:"unavailable"}` | Sim |
 
-Ainda não existem endpoints de cadastro, serviços ou reservas. Não há autenticação funcional nesta fase.
+Na Fase 1 foram adicionados `/api/v1/auth/register`, `login`, `me`, `logout`, `/api/v1/services`, `/professionals` e consultas administrativas. Mutações exigem ADMIN, e o primeiro administrador é criado por comando local explícito. Ainda não existem endpoints de reserva.
 
 ## Evolução planejada
 
-A cada funcionalidade: especificação `spec.md`, plano `plan.md`, tarefas `tasks.md`, testes, PR e CI. A próxima entrega contempla autenticação e perfis. APIs serão organizadas por funcionalidade conforme o domínio ganhar comportamento, sem classes ou camadas fictícias antecipadas.
+A cada funcionalidade: especificação `spec.md`, plano `plan.md`, tarefas `tasks.md`, testes, PR e CI. A próxima entrega contempla disponibilidade, pausas e bloqueios de horários. APIs serão organizadas por funcionalidade conforme o domínio ganhar comportamento, sem classes ou camadas fictícias antecipadas.
+
+## Sessões e segurança (Fase 1)
+
+A autenticação está isolada em `apps/api/src/modules/auth/`. O hash scrypt da senha é armazenado em `users.password_hash`; a tabela `sessions` armazena somente SHA-256 dos tokens opacos e a expiração. O navegador recebe um cookie HttpOnly com SameSite=Lax, Secure sob `NODE_ENV=production` e validade de sete dias. Logout invalida o hash no banco.
+
+A função `requireAdmin` verifica a identidade na API, e não no frontend. Uma verificação de cabeçalho `Origin` bloqueia mutações de origem diferente. O rate limiting de login é local à instância e precisa de infraestrutura distribuída antes do deploy produtivo.
+
+O módulo `apps/api/src/modules/catalog/` concentra as rotas públicas e administrativas. A tabela `professional_services` define quais serviços são executados por cada profissional, e atualizações de vínculos são transacionais.
+
+Decisão de segurança: [ADR 0002](adr/0002-sessoes-opacas.md).
