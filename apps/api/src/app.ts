@@ -9,7 +9,11 @@ type Options = { databaseCheck?: () => Promise<boolean>; logger?: boolean };
 
 /** Factory: a API pode ser testada sem abrir porta HTTP externa. */
 export function createApp(options: Options = {}) {
-  const app = Fastify({ logger: options.logger ?? false, bodyLimit: 32 * 1024 });
+  const app = Fastify({
+    logger: options.logger ?? false,
+    bodyLimit: 32 * 1024,
+    ajv: {customOptions: {removeAdditional: false}},
+  });
   const databaseCheck = options.databaseCheck ?? checkDatabase;
 
   app.addHook('onRequest', async (request, reply) => {
