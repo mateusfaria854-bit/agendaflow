@@ -5,7 +5,7 @@ Projeto incremental para um único negócio de serviços. O cronograma é defini
 | Fase | Entrega | Critério principal |
 |---|---|---|
 | 0 | Fundação técnica | Workspaces, React, Fastify, PostgreSQL, migrations, seed, SDD e CI validados |
-| 1 | Identidade e catálogo | Cadastro/login seguros, papéis, serviços e profissionais testados |
+| 1 | Identidade e catálogo | Cadastro/login, sessões, controle ADMIN e catálogo com testes |
 | 2 | Disponibilidade | Jornada, pausas, bloqueios e slots válidos calculados no servidor |
 | 3 | Reservas | Criar, listar, cancelar e impedir conflitos simultâneos no banco |
 | 4 | Operação administrativa | Calendário, reservas manuais e transições de status autorizadas |
@@ -19,3 +19,5 @@ Dados de demonstração são sempre sintéticos. O sistema não realiza pagament
 
 ## Contribuição
 Novas funcionalidades devem ter especificação, plano e tarefas antes do código. Mudanças de escopo precisam atualizar os testes e a documentação relacionada.
+
+**Fase 1:** implementada e submetida aos testes de integração. **Próxima etapa:** Fase 2, disponibilidade e bloqueios de horários. Os fluxos de reservas seguem fora do escopo até Fase 3.

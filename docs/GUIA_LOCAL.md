@@ -55,3 +55,26 @@ A primeira execução de `db:verify` exige a migração e o seed. O CI realiza a
 O volume `agenda_pg_data` mantém os dados entre reinicializações. `docker compose down` interrompe os serviços. `docker compose down -v` **apaga permanentemente o banco local** e só deve ser usado quando a intenção for reinicializar a demonstração.
 
 Novas mudanças de schema devem entrar em um novo arquivo de migração em `apps/api/db/migrations/`; nunca alterar arquivos SQL já aplicados.
+
+## Fase 1: cadastrar e administrar serviços
+
+Depois de subir o PostgreSQL e aplicar as migrações, o catálogo público da interface mostra os serviços fictícios do seed. Contas públicas são sempre do tipo **CLIENTE**, sem permissão para administrar o sistema.
+
+Para criar o primeiro administrador, use uma conta de e-mail **ainda não cadastrada** no AgendaFlow. No PowerShell, defina as variáveis temporárias:
+
+```powershell
+$env:ADMIN_NAME = "Administrador Local"
+$env:ADMIN_EMAIL = "admin-local@example.invalid"
+$secret = Read-Host "Senha forte do administrador (12+ caracteres)" -AsSecureString
+$env:ADMIN_PASSWORD = [System.Net.NetworkCredential]::new("", $secret).Password
+npm run admin:create
+Remove-Item Env:ADMIN_PASSWORD
+Remove-Item Env:ADMIN_EMAIL
+Remove-Item Env:ADMIN_NAME
+```
+
+O endereço acima é um exemplo fictício; o usuário administrador deve utilizar um e-mail exclusivo. A senha não é gravada no repositório. O comando **não promove** contas existentes e não possui senha padrão. Em produção é necessário configurar HTTPS, `NODE_ENV=production` e `WEB_ORIGIN`, além de monitoramento e limitação distribuída de tentativas.
+
+Na interface, entre com o usuário administrador para criar, editar e desativar serviços e profissionais. Os dados são persistidos no PostgreSQL local. **Não há agendamentos reais nesta fase.**
+
+`GET /api/v1/health` continua público, `GET /api/v1/auth/me` exige sessão válida e operações de catálogo exigem ADMIN.

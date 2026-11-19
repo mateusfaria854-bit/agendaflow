@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { APP_NAME, type HealthResponse } from '@agendaflow/shared';
+import Portal from './features/portal/Portal.js';
 
 type ApiStatus = 'checking' | 'online' | 'offline';
 
@@ -12,8 +13,8 @@ const features = [
 ];
 
 const roadmap = [
-  { phase: '00', name: 'Fundação técnica', summary: 'Monorepo, API, React, PostgreSQL, testes e SDD.', current: true },
-  { phase: '01', name: 'Identidade e catálogo', summary: 'Autenticação, perfis, serviços e profissionais.', current: false },
+  { phase: '00', name: 'Fundação técnica', summary: 'Monorepo, API, React, PostgreSQL, testes e SDD.', current: false },
+  { phase: '01', name: 'Identidade e catálogo', summary: 'Cadastro, login, serviços e profissionais conectados à API.', current: true },
   { phase: '02', name: 'Agenda disponível', summary: 'Disponibilidades, folgas e cálculo dos horários.', current: false },
   { phase: '03', name: 'Reserva ponta a ponta', summary: 'Agendar, listar e cancelar sem dupla reserva.', current: false },
   { phase: '04', name: 'Operação administrativa', summary: 'Painel, calendário e gestão da equipe.', current: false },
@@ -45,6 +46,7 @@ function App() {
         <nav aria-label="Navegação principal" className="nav-links">
           <a href="#visao">Visão geral</a>
           <a href="#modulos">Módulos</a>
+          <a href="#portal">Entrar / cadastrar</a>
           <a href="#etapas">Roadmap</a>
         </nav>
         <a className="github-link" href="https://github.com/mateusfaria854-bit/agendaflow"
@@ -54,11 +56,11 @@ function App() {
       <main id="inicio">
         <section className="hero section-wrap" id="visao">
           <div className="hero-copy">
-            <div className="eyebrow"><span className="pulse" /> EM DESENVOLVIMENTO <span className="eyebrow-separator">/</span> FASE 00</div>
+            <div className="eyebrow"><span className="pulse" /> EM DESENVOLVIMENTO <span className="eyebrow-separator">/</span> FASE 01</div>
             <h1>O próximo horário.<br/><em>Uma experiência melhor.</em></h1>
             <p>Uma plataforma de agendamentos planejada para simplificar a rotina de clientes e equipes. Construída por etapas, com arquitetura clara e validações no servidor.</p>
             <div className="hero-actions">
-              <a className="button-primary" href="#etapas">Explorar desenvolvimento <span aria-hidden="true">↗</span></a>
+              <a className="button-primary" href="#portal">Explorar catálogo <span aria-hidden="true">↗</span></a>
               <a className="button-ghost" href="#modulos">Conhecer o escopo <span aria-hidden="true">→</span></a>
             </div>
             <div className="hero-meta">
@@ -117,6 +119,8 @@ function App() {
           ))}</div>
         </section>
 
+        <Portal />
+
         <section className="roadmap-section" id="etapas">
           <div className="section-wrap">
             <div className="section-heading"><div><span className="section-tag">/ CONSTRUÇÃO</span><h2>Um produto. Etapa por etapa.</h2></div>
@@ -136,7 +140,7 @@ function App() {
         <div><span className="footer-brand">AgendaFlow</span><p>Planejamento e desenvolvimento por Mateus Faria Andrade · Engenharia de Software, UniRV.</p></div>
         <div className="api-status" role="status">
           <span className={api === 'online' ? 'status-light on' : 'status-light'} />
-          {api === 'checking' ? 'Verificando API...' : api === 'online' ? 'API local conectada' : 'Prévia visual · API local não iniciada'}
+          {api === 'checking' ? 'Verificando API...' : api === 'online' ? 'API local conectada' : 'API local não iniciada'}
         </div>
       </footer>
     </div>

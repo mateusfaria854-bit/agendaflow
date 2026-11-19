@@ -10,7 +10,8 @@
     "test": "node --import tsx --test tests/*.test.ts",
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "tsx src/db/seed.ts",
-    "db:verify": "tsx src/db/verify.ts"
+    "db:verify": "tsx src/db/verify.ts",
+    "admin:create": "tsx src/db/create-admin.ts"
   },
   "dependencies": {
     "@agendaflow/shared": "0.1.0",
