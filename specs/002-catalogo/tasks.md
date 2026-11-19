@@ -6,4 +6,4 @@
 - [x] T-203: Implementar profissionais e relacionamento N:N com transações.
 - [x] T-204: Adicionar formulários administrativos e catálogo na interface.
 - [x] T-205: Testar autorização, validações e atualização dos vínculos.
-- [ ] T-206: Verificar CI e revisar PR antes de integrar a main.
+- [x] T-206: CI aprovado, contratos de catálogo e permissões revisados.

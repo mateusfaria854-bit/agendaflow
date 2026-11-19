@@ -7,4 +7,4 @@
 - [x] T-104: Proteger rotas administrativas e restringir origem das mutações.
 - [x] T-105: Criar formulários de cadastro/login e estado de sessão no frontend.
 - [x] T-106: Adicionar testes unitários, integração com banco e critérios de CI.
-- [ ] T-107: Confirmar sucesso dos checks no Pull Request antes do merge.
+- [x] T-107: Checks de push e Pull Request aprovados (tipagem, integração e PostgreSQL).
