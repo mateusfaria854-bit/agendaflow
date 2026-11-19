@@ -89,7 +89,7 @@ A especificação vigente é [Fase 0](specs/000-fundacao/spec.md). A próxima et
 
 ## Próximas fases
 
-Confira o [Roadmap](docs/ROADMAP.md). O planejamento contempla identidade, catálogo de serviços e profissionais, disponibilidade, criação de reservas, operação administrativa e publicação.
+Confira o [Roadmap](docs/ROADMAP.md) e as [Issues planejadas](https://github.com/mateusfaria854-bit/agendaflow/issues). O planejamento contempla identidade, catálogo de serviços e profissionais, disponibilidade, criação de reservas, operação administrativa e publicação.
 
 ## Segurança e escopo
 
