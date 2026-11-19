@@ -31,10 +31,11 @@ export function createApp(options: Options = {}) {
 
   app.get('/', async() => ({name:APP_NAME,phase:1}));
   app.setErrorHandler((error,_request,reply) => {
-    const status = error.statusCode && error.statusCode >= 400 && error.statusCode < 500
-      ? error.statusCode : 500;
+    const err = error as { statusCode?: number; message?: string };
+    const status = err.statusCode && err.statusCode >= 400 && err.statusCode < 500
+      ? err.statusCode : 500;
     if (status===500) app.log.error(error);
-    reply.code(status).send({error: status===500 ? 'Falha interna no servidor.' : error.message});
+    reply.code(status).send({error: status===500 ? 'Falha interna no servidor.' : (err.message ?? 'Requisição inválida.')});
   });
   return app;
 }
