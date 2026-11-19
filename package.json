@@ -1,0 +1,26 @@
+{
+  "name": "agendaflow",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev:web": "npm run dev -w @agendaflow/web",
+    "dev:api": "npm run dev -w @agendaflow/api",
+    "build": "npm run build -w @agendaflow/shared && npm run build -w @agendaflow/api && npm run build -w @agendaflow/web",
+    "test": "npm run test -w @agendaflow/shared && npm run test -w @agendaflow/api",
+    "spec:check": "node scripts/spec-check.mjs",
+    "arch:check": "node scripts/arch-check.mjs",
+    "db:migrate": "npm run db:migrate -w @agendaflow/api",
+    "db:seed": "npm run db:seed -w @agendaflow/api",
+    "db:verify": "npm run db:verify -w @agendaflow/api",
+    "check": "npm run spec:check && npm run arch:check && npm run build && npm test"
+  },
+  "license": "UNLICENSED"
+}
