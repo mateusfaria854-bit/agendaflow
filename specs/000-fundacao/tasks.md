@@ -8,4 +8,4 @@
 - [x] T-005: Implementar prévia responsiva e explicitamente não funcional.
 - [x] T-006: Documentar arquitetura, decisões, roadmap e processo SDD.
 - [x] T-007: Configurar CI para compilar, testar e validar PostgreSQL.
-- [ ] T-008: Confirmar que o CI do Pull Request conclui todas as verificações com sucesso.
+- [x] T-008: CI do PR aprovado (build, testes, migrações, seed e integridade do PostgreSQL).
