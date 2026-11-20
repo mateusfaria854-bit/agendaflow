@@ -82,10 +82,10 @@ O workflow [Disponibilidade da demo HTTPS](../.github/workflows/demo-uptime.yml)
 
 ### Verificação operacional ainda necessária
 
-A rotina de retenção já foi implementada, mas está **desabilitada para exclusões na Railway** até a realização de um backup do volume hospedado e uma restauração testada desse backup. Confira [Retenção de dados fictícios](RETENCAO_DEMO.md).
+A rotina de retenção já foi implementada e está **desabilitada para exclusões na Railway** até conclusão de retenção/alertas e ensaio de recuperação operacional. O backup lógico diário independente do Postgres já foi verificado com restauração isolada e recuperação do S3; isso não equivale ao snapshot nativo do volume. Confira [Retenção de dados fictícios](RETENCAO_DEMO.md).
 
 - Definir retenção e expurgo automático de contas e agendamentos de demonstração, com política para sessões expiradas.
-- Configurar backup automático e **testar a restauração em ambiente isolado**; o volume persistente sozinho não equivale a backup.
+- Monitorar o backup lógico diário já configurado e definir retenção de objetos/alertas; habilitar também o backup nativo do volume para proteção complementar. Consulte [Backup Railway](BACKUP_RAILWAY.md).
 - Adicionar limites de abuso adequados a múltiplas réplicas e proteger rotas sensíveis contra tráfego excessivo.
 - Configurar alertas operacionais e monitoramento de recursos e erros; o teste agendado de disponibilidade é apenas uma verificação periódica.
 - Revisar a conformidade LGPD e manter a demo restrita a informações fictícias.

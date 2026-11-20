@@ -10,7 +10,9 @@
 
 ## Operação antes de automatizar
 
-- [ ] Configurar backup automático do volume PostgreSQL da Railway.
-- [ ] Testar restauração a partir de um backup do ambiente hospedado.
+- [x] Configurar backup lógico independente diário do PostgreSQL da Railway em bucket privado.
+- [x] Restaurar o dump real em banco temporário e verificar o download íntegro do objeto S3.
+- [ ] Habilitar snapshots automáticos nativos do volume no painel da Railway.
+- [ ] Definir retenção do bucket, alertas e ensaio operacional de recuperação.
 - [ ] Habilitar cron de limpeza apenas após backup e validação da política de retenção.
 - [ ] Acompanhar logs agregados e métricas, sem expor usuários.

@@ -6,10 +6,11 @@
 [![Disponibilidade HTTPS](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/demo-uptime.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/demo-uptime.yml)
 [![Capturas reais](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/readme-media.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/readme-media.yml)
 [![Backup e restauração](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/backup-restore.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/backup-restore.yml)
+[![Imagem do backup independente](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/backup-image.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/backup-image.yml)
 
 **Plataforma full-stack de agendamentos** em desenvolvimento, com React, TypeScript, Node.js, Fastify e PostgreSQL. O projeto segue **Spec-Driven Development (SDD)** e prioriza uma arquitetura clara, requisitos verificáveis e prevenção de reservas duplicadas.
 
-> **Estado atual: MVP full-stack com demonstração online na Railway.** Clientes reservam e cancelam, administradores gerenciam a agenda e profissionais consultam seus atendimentos. API Fastify e frontend React podem ser executados **na mesma origem HTTP/HTTPS**, com Docker, CI e E2E. **Demo hospedada e verificada externamente em HTTPS:** o frontend/API e PostgreSQL estão online na Railway, com smoke test periódico de disponibilidade. **Somente dados fictícios:** permanecem pendentes proteção contra abuso mais robusta, backup e restauração testados, retenção/limpeza de dados e monitoramento operacional completo.
+> **Estado atual: MVP full-stack com demonstração online na Railway.** Clientes reservam e cancelam, administradores gerenciam a agenda e profissionais consultam seus atendimentos. API Fastify e frontend React podem ser executados **na mesma origem HTTP/HTTPS**, com Docker, CI e E2E. **Demo hospedada e verificada externamente em HTTPS:** o frontend/API e PostgreSQL estão online na Railway, com smoke test periódico de disponibilidade. **Somente dados fictícios:** há backup lógico diário do PostgreSQL para bucket privado com restauração isolada e download validado. Permanecem pendentes backups nativos do volume, política de retenção e alertas, além de proteção contra abuso distribuído e revisão de privacidade.
 
 ## Demonstração
 
@@ -71,6 +72,7 @@ docs/
   ARQUITETURA.md        Limites e fluxo entre camadas
   GUIA_LOCAL.md         Instalação e execução
   RETENCAO_DEMO.md      Retenção segura e limpeza controlada da demo
+  BACKUP_RAILWAY.md      Backup lógico privado e procedimento de recuperação
   ROADMAP.md            Fases do MVP
   adr/                  Decisões arquiteturais
 scripts/                Verificação SDD e de dependências
@@ -190,19 +192,19 @@ Para uma demo aberta, configure `DEMO_MODE=true` no serviço: cadastros aceitam 
 
 ### Retenção e limpeza segura da demonstração
 
-O AgendaFlow agora possui um comando de manutenção com **simulação por padrão**, testes PostgreSQL e bloqueio explícito contra uso fora do modo demo. Só considera clientes fictícios com idade e última atividade superiores a 30 dias, sem horários recentes/futuros, e exclui suas dependências em transação. **A exclusão automática continua desativada** até habilitar backups do Postgres da Railway e testar a restauração de um desses backups.
+O AgendaFlow agora possui um comando de manutenção com **simulação por padrão**, testes PostgreSQL e bloqueio explícito contra uso fora do modo demo. Só considera clientes fictícios com idade e última atividade superiores a 30 dias, sem horários recentes/futuros, e exclui suas dependências em transação. **A exclusão automática continua desativada**. O backup lógico independente do Postgres da Railway foi criado, restaurado em PostgreSQL temporário e recuperado do bucket com verificação byte a byte; falta fechar política de retenção/alertas antes de agendar o expurgo.
 
-Guia: [Retenção de dados fictícios](docs/RETENCAO_DEMO.md). O workflow de backup/restauração existente testa apenas bancos descartáveis, não o volume hospedado.
+Guia: [Retenção de dados fictícios](docs/RETENCAO_DEMO.md). O [workflow de integração](.github/workflows/backup-restore.yml) usa bancos descartáveis; adicionalmente, o [backup real da Railway](docs/BACKUP_RAILWAY.md) envia dumps verificados a um bucket privado diariamente.
 
 ### Publicação demonstrativa
 
 Uma instância de demonstração foi **implantada na Railway em 20/11/2026** (`agendaflow-demo`, ambiente `production`): serviço web React/Fastify, PostgreSQL privado com volume, migrações e seed fictício executados pelo comando `npm run db:demo:bootstrap`, e healthcheck `/api/v1/ready` aprovado. O domínio HTTPS [AgendaFlow Demo](https://agendaflow-web-production.up.railway.app/) teve **DNS, TLS, frontend, API e conexão com PostgreSQL verificados externamente** pelo workflow [Disponibilidade da demo HTTPS](.github/workflows/demo-uptime.yml), executado no GitHub Actions e agendado a cada 6 horas.
 
-A implantação segue a branch `main` e usa `DEMO_MODE=true`, que restringe cadastros públicos a e-mails **fictícios** `@example.invalid`. Uma URL pública **não significa produção comercial pronta**: faltam proteção contra abuso distribuído, política de retenção/expurgo, backup e restauração testados, observabilidade completa e revisão LGPD. **Não cadastrar clientes reais, nem usar senhas pessoais.** Pagamentos, notificações e recuperação de senha não fazem parte do MVP. Consulte o [Guia de implantação](docs/DEPLOY_DEMO.md) para operação, backup e rollback.
+A implantação segue a branch `main` e usa `DEMO_MODE=true`, que restringe cadastros públicos a e-mails **fictícios** `@example.invalid`. Uma URL pública **não significa produção comercial pronta**: faltam proteção contra abuso distribuído, política de retenção/expurgo, backup nativo do volume, alertas operacionais, observabilidade completa e revisão LGPD. O backup lógico independente já foi validado. **Não cadastrar clientes reais, nem usar senhas pessoais.** Pagamentos, notificações e recuperação de senha não fazem parte do MVP. Consulte o [Guia de implantação](docs/DEPLOY_DEMO.md) para operação, backup e rollback.
 
 ### Backup e restauração em ambiente de testes
 
-O workflow [Backup e restauração PostgreSQL](.github/workflows/backup-restore.yml) executa `pg_dump` e `pg_restore` com **dados sintéticos em banco isolado** e verifica tabelas, migrações e a restrição contra reservas sobrepostas. Esse teste foi aprovado, mas **não substitui** backups periódicos, seguros e restaurações testadas do banco da Railway.
+O workflow [Backup e restauração PostgreSQL](.github/workflows/backup-restore.yml) executa `pg_dump` e `pg_restore` com **dados sintéticos em banco isolado** e verifica tabelas, migrações e a restrição contra reservas sobrepostas. Esse teste foi aprovado. **Além dele**, um serviço de backup privado na Railway executou com sucesso `pg_dump`, `pg_restore` em PostgreSQL temporário e upload/download S3 com comparação de bytes. O job segue um agendamento diário de 03:20 UTC. Consulte o [guia de backup da Railway](docs/BACKUP_RAILWAY.md). Os snapshots nativos do volume e a retenção/alertas do bucket ainda precisam ser configurados.
 
 ## Testes e verificações
 
