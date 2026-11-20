@@ -7,6 +7,7 @@
 [![Capturas reais](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/readme-media.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/readme-media.yml)
 [![Backup e restauração](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/backup-restore.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/backup-restore.yml)
 [![Imagem do backup independente](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/backup-image.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/backup-image.yml)
+[![Auditoria diária do backup](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/backup-daily-audit.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/backup-daily-audit.yml)
 
 **Plataforma full-stack de agendamentos** em desenvolvimento, com React, TypeScript, Node.js, Fastify e PostgreSQL. O projeto segue **Spec-Driven Development (SDD)** e prioriza uma arquitetura clara, requisitos verificáveis e prevenção de reservas duplicadas.
 
@@ -197,7 +198,7 @@ O serviço de backup inclui um **inventário somente leitura** do bucket privado
 
 ### Monitoramento e incidentes
 
-O workflow [Disponibilidade da demo HTTPS](.github/workflows/demo-uptime.yml) verifica DNS, TLS, frontend, API, PostgreSQL e **o backup verificado nas últimas 36 horas** a cada 6 horas. Se um teste falhar, inclusive por backup ausente ou antigo, ele **abre ou atualiza uma issue** com o rótulo `agenda-demo-uptime`; após a recuperação, encerra o incidente automaticamente. Esses alertas são registrados no GitHub, e não equivalem a uma plataforma 24/7 com notificações garantidas. Ver [guia operacional](docs/OPERACAO_DEMO.md).
+O workflow [Disponibilidade da demo HTTPS](.github/workflows/demo-uptime.yml) verifica DNS, TLS, frontend, API, PostgreSQL e **o backup verificado nas últimas 36 horas** a cada 6 horas. Se um teste falhar, inclusive por backup ausente ou antigo, ele **abre ou atualiza uma issue** com o rótulo `agenda-demo-uptime`; após a recuperação, encerra o incidente automaticamente. Esses alertas são registrados no GitHub, e não equivalem a uma plataforma 24/7 com notificações garantidas. Há também uma [auditoria diária de backup](.github/workflows/backup-daily-audit.yml), às **08h30 UTC**, que verifica se foi registrada uma cópia íntegra depois da última janela prevista das 03h20 UTC. Falhas geram uma issue separada, com o rótulo `agenda-backup-diario`. A confirmação de uma cópia nessa janela não prova que o cron, e não uma execução manual, a produziu. Ver [guia operacional](docs/OPERACAO_DEMO.md).
 
 ### Retenção e limpeza segura da demonstração
 

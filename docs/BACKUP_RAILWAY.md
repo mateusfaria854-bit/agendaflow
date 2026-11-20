@@ -22,7 +22,7 @@ A infraestrutura real foi provisionada no projeto `agendaflow-demo`, ambiente `p
 
 **Validação real:** em 20/11/2026 o job leu o banco PostgreSQL hospedado sem interrompê-lo, criou dump custom, restaurou em servidor temporário, verificou migrações/restrição de conflitos, enviou o arquivo ao bucket e baixou de volta para comparação byte a byte. A integridade foi aprovada duas vezes, sendo a última já com teste de download S3.
 
-**Atualização:** o novo job de backup foi executado contra o PostgreSQL hospedado, restaurou e recuperou o arquivo do bucket, e registrou a última cópia íntegra no banco. O monitor externo do GitHub Actions confirmou `/api/v1/backups/ready` como `fresh`. O agendamento permanece `20 3 * * *` e **a primeira execução pela agenda diária ainda precisa ser observada**. Backups nativos do volume e retenção dos objetos continuam pendentes.
+**Atualização:** o novo job de backup foi executado contra o PostgreSQL hospedado, restaurou e recuperou o arquivo do bucket, e registrou a última cópia íntegra no banco. O monitor externo do GitHub Actions confirmou `/api/v1/backups/ready` como `fresh`. O endpoint separado `/api/v1/backups/daily` e a [auditoria diária do GitHub Actions](../.github/workflows/backup-daily-audit.yml) conferem a existência de uma cópia validada desde o último horário previsto de 03h20 UTC, com verificação às 08h30 UTC. Essa consulta não modifica o banco, o bucket ou a agenda. O agendamento permanece `20 3 * * *` e **a primeira execução pela agenda diária ainda precisa ser observada**. Backups nativos do volume e retenção dos objetos continuam pendentes.
 
 ## Configuração na Railway
 

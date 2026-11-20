@@ -1,0 +1,75 @@
+name: Auditoria diária do backup PostgreSQL
+
+on:
+  schedule:
+    - cron: '30 8 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/backup-daily-audit.yml'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: agendaflow-backup-daily-audit
+  cancel-in-progress: false
+
+jobs:
+  verificar-copia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      DEMO_BASE_URL: https://agendaflow-web-production.up.railway.app
+    steps:
+      - name: Confirmar cópia validada depois da janela diária 03h20 UTC
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error --location \
+            --retry 3 --retry-delay 5 --connect-timeout 10 --max-time 30 \
+            "$DEMO_BASE_URL/api/v1/backups/daily" -o /tmp/backup-daily.json
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const data=JSON.parse(fs.readFileSync("/tmp/backup-daily.json","utf8"));
+            if(data.status!=="verified") process.exit(1);
+            console.log("Backup validado após o último horário previsto (03h20 UTC).");
+          '
+      - name: Registrar incidente separado quando faltar backup diário
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          label=agenda-backup-diario
+          gh label create "$label" -R "$GITHUB_REPOSITORY" \
+            --color "B42318" --description "Cópia diária do PostgreSQL ausente" --force
+          issue="$(gh issue list -R "$GITHUB_REPOSITORY" --label "$label" \
+            --state open --json number --jq '.[0].number // empty')"
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [[ -z "$issue" ]]; then
+            gh issue create -R "$GITHUB_REPOSITORY" \
+              --title "AgendaFlow: backup diário sem validação após 03h20 UTC" \
+              --label "$label" \
+              --body "Não foi confirmada uma cópia válida depois da janela diária. Verifique o cron na Railway e o backup no bucket privado. Execução: $run_url. Não publique dumps ou credenciais."
+          else
+            gh issue comment "$issue" -R "$GITHUB_REPOSITORY" \
+              --body "Uma nova verificação diária falhou. Execução: $run_url"
+          fi
+      - name: Encerrar incidente quando existir nova cópia válida
+        if: ${{ success() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          issue="$(gh issue list -R "$GITHUB_REPOSITORY" --label agenda-backup-diario \
+            --state open --json number --jq '.[0].number // empty')"
+          if [[ -n "$issue" ]]; then
+            run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            gh issue close "$issue" -R "$GITHUB_REPOSITORY" \
+              --comment "Cópia recente validada após a janela de 03h20 UTC. Execução: $run_url"
+          fi

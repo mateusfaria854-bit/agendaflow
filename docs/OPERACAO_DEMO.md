@@ -14,6 +14,14 @@ Quando o workflow falha, inclusive quando o cron de backup deixa de registrar um
 
 Isso registra falhas no GitHub, **não garante push, e-mail, SMS ou resposta imediata**. O intervalo de 6 horas pode atrasar a detecção.
 
+## Checagem diária de backups
+
+Além do alerta de 36h, o workflow [Auditoria diária do backup](../.github/workflows/backup-daily-audit.yml) roda às **08h30 UTC** e exige que `/api/v1/backups/daily` confirme uma cópia íntegra posterior ao último agendamento esperado das 03h20 UTC. O retorno é somente `verified` (HTTP 200) ou `unavailable` (HTTP 503); horários, hashes e chaves do bucket não são expostos.
+
+Falhas geram ou atualizam uma issue com o rótulo `agenda-backup-diario`. A recuperação encerra apenas essa issue, sem interferir nos incidentes gerais `agenda-demo-uptime`. A verificação pode ser acionada manualmente, mas isso não executa um backup nem apaga arquivos.
+
+A presença de uma cópia após o horário de corte **não demonstra qual processo a produziu**. É necessário inspecionar os logs de execução da Railway para atestar que o cron diário funcionou. A primeira execução agendada com a nova simulação S3 continua pendente de confirmação.
+
 ## Resposta a falhas
 
 1. Conferir a execução do GitHub Actions e qual check falhou.
