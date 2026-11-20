@@ -42,10 +42,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Instalar dependências e Chromium
-        run: |
-          npm install --no-audit --no-fund
-          npx playwright install --with-deps chromium
+      - name: Instalar dependências do monorepo
+        run: npm install --no-audit --no-fund
+      - name: Instalar Chromium e dependências do navegador
+        run: npx playwright install --with-deps chromium
       - name: Compilar, migrar e popular apenas banco descartável
         run: |
           npm run build
