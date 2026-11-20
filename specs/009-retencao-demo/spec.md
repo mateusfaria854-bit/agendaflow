@@ -6,7 +6,7 @@ Evitar o acúmulo de contas e reservas fictícias no ambiente público de portf�
 ## Requisitos
 - Somente quando a instância estiver em DEMO_MODE=true.
 - Execução padrão é **simulação sem escrita**; a execução real exige duas confirmações técnicas: DEMO_MAINTENANCE_ENABLED=true e o parâmetro --execute.
-- Conta elegível: papel CLIENTE, e-mail no domínio reservado @example.invalid, criada há pelo menos 30 dias, sem reserva recente/futura, sem sessão recente/ativa e sem auditoria recente. ADMIN e PROFISSIONAL nunca são eliminados.
+- Conta elegível: papel CLIENTE, e-mail no domínio reservado @example.invalid, criada há pelo menos 30 dias, sem reserva recente/futura, sem sessão recente/ativa, sem auditoria recente e sem login/logout recente (last_activity_at). ADMIN e PROFISSIONAL nunca são eliminados.
 - Retenção mínima de 30 dias, máxima de 365 dias; lote máximo de 100 clientes por execução.
 - Excluir registros vinculados de modo transacional, respeitando FK e auditoria, incluindo sessões expiradas. Se qualquer etapa falhar, reverter tudo.
 - Não imprimir nome, e-mail, senha, token, nem listas de usuários em logs.

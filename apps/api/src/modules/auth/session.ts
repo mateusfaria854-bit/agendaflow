@@ -29,6 +29,7 @@ export async function createSession(userId: string, reply: FastifyReply): Promis
     "INSERT INTO sessions (user_id, token_hash, expires_at) VALUES ($1, $2, now() + interval '7 days')",
     [userId, digest(raw)],
   );
+  await database().query('UPDATE users SET last_activity_at=now() WHERE id=$1', [userId]);
   reply.header('Set-Cookie', `${COOKIE_NAME}=${raw}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_SECONDS}${SECURE_COOKIE}`);
 }
 
@@ -46,7 +47,13 @@ export async function findSessionUser(request: FastifyRequest): Promise<SessionU
 
 export async function revokeSession(request: FastifyRequest): Promise<void> {
   const token = sessionToken(request);
-  if (token) await database().query('DELETE FROM sessions WHERE token_hash=$1', [digest(token)]);
+  if (token) {
+    await database().query(
+      'WITH revoked AS (DELETE FROM sessions WHERE token_hash=$1 RETURNING user_id) ' +
+      'UPDATE users SET last_activity_at=now() FROM revoked WHERE users.id=revoked.user_id',
+      [digest(token)],
+    );
+  }
 }
 
 export async function requireAdmin(request: FastifyRequest, reply: FastifyReply): Promise<SessionUser | null> {

@@ -23,8 +23,9 @@ test('retencao demo: simula por padrao e remove apenas clientes ficticios inativ
       [fresh, 'CLIENTE', 0],
     ] as const) {
       await db.query(
-        "INSERT INTO users(id,name,email,password_hash,role,created_at)" +
-        " VALUES($1,'Conta Ficticia', $2, 'hash-ficticio', $3, now()-($4::int*interval '1 day'))",
+        "INSERT INTO users(id,name,email,password_hash,role,created_at,last_activity_at)" +
+        " VALUES($1,'Conta Ficticia', $2, 'hash-ficticio', $3," +
+        " now()-($4::int*interval '1 day'), now()-($4::int*interval '1 day'))",
         [id, 'demo-' + id + '@example.invalid', role, days],
       );
     }

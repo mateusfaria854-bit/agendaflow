@@ -25,6 +25,7 @@ const eligibleSql = [
   "WHERE u.role = 'CLIENTE'",
   "  AND lower(u.email) LIKE '%@example.invalid'",
   '  AND u.created_at < ' + cutoffSql,
+  '  AND u.last_activity_at < ' + cutoffSql,
   '  AND NOT EXISTS (SELECT 1 FROM appointments a',
   '    WHERE a.client_id = u.id AND (a.ends_at >= ' + cutoffSql + ' OR a.updated_at >= ' + cutoffSql + '))',
   '  AND NOT EXISTS (SELECT 1 FROM sessions s',
