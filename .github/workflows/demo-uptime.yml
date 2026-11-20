@@ -38,7 +38,9 @@ jobs:
             const headers=fs.readFileSync("/tmp/agendaflow-health-headers","utf8").toLowerCase();
             if(body.status!=="ok"||body.service!=="agendaflow-api")process.exit(1);
             if(!headers.includes("cache-control: no-store"))process.exit(1);
-            console.log("API /health e cabeçalhos de segurança OK");
+            if(!headers.includes("strict-transport-security: max-age=15552000"))process.exit(1);
+            if(!headers.includes("permissions-policy: camera=(), microphone=(), geolocation=(), payment=()"))process.exit(1);
+            console.log("API /health, HSTS e Permissions-Policy OK");
           '
       - name: Conferir conexão efetiva com PostgreSQL
         shell: bash
