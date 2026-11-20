@@ -3,6 +3,7 @@ import fastifyStatic from '@fastify/static';
 import { fileURLToPath } from 'node:url';
 import { APP_NAME, type HealthResponse, type ReadyResponse } from '@agendaflow/shared';
 import { checkDatabase } from './db/client.js';
+import {checkBackupFreshness, type BackupFreshness} from './db/backup-health.js';
 import { authRoutes } from './modules/auth/routes.js';
 import { checkWriteOrigin } from './modules/auth/session.js';
 import { catalogRoutes } from './modules/catalog/routes.js';
@@ -11,7 +12,7 @@ import {appointmentRoutes} from './modules/appointments/routes.js';
 import {adminAppointmentRoutes} from './modules/admin/routes.js';
 import {staffRoutes} from './modules/staff/routes.js';
 
-type Options = { databaseCheck?: () => Promise<boolean>; logger?: boolean; serveWeb?: boolean; webRoot?: string };
+type Options = { databaseCheck?: () => Promise<boolean>; backupCheck?: () => Promise<BackupFreshness>; logger?: boolean; serveWeb?: boolean; webRoot?: string };
 
 /** Factory: a API pode ser testada sem abrir porta HTTP externa. */
 export function createApp(options: Options = {}) {
@@ -21,6 +22,7 @@ export function createApp(options: Options = {}) {
     ajv: {customOptions: {removeAdditional: false}},
   });
   const databaseCheck = options.databaseCheck ?? checkDatabase;
+  const backupCheck = options.backupCheck ?? checkBackupFreshness;
   // Uma instância produtiva não deve emitir cookies de sessão sem HTTPS.
   if (process.env.NODE_ENV === 'production') {
     const origin = process.env.WEB_ORIGIN;
@@ -55,6 +57,18 @@ export function createApp(options: Options = {}) {
   app.get<{Reply:ReadyResponse}>('/api/v1/ready', async(_request,reply) => {
     if (await databaseCheck()) return {status:'ready'};
     return reply.code(503).send({status:'unavailable'});
+  });
+
+  // Monitor externo: nenhum identificador S3, hash ou detalhe do banco e publicado.
+  // Somente a demonstracao permite consultar o status agregado.
+  app.get('/api/v1/backups/ready', async (_request, reply) => {
+    if (process.env.DEMO_MODE !== 'true') {
+      return reply.code(404).send({error:'Rota não encontrada.'});
+    }
+    const status = await backupCheck();
+    return status === 'fresh'
+      ? {status:'fresh'}
+      : reply.code(503).send({status:'unavailable'});
   });
 
   app.register(authRoutes, {prefix:'/api/v1/auth'});

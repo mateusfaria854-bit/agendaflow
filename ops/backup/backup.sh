@@ -74,4 +74,19 @@ if ! cmp -s "$ARCHIVE" "$DOWNLOADED"; then
   exit 1
 fi
 pg_restore --list "$DOWNLOADED" >/dev/null
-echo "Backup confirmado no bucket privado e recuperado byte a byte. Arquivo: $key. Bytes: $localSize"
+
+# Atesta o backup somente DEPOIS de um restore em servidor isolado
+# e da recuperacao byte-a-byte do objeto no armazenamento privado.
+# Nenhum conteudo do dump ou credencial e registrado na API.
+sha="$(sha256sum "$DOWNLOADED" | cut -d ' ' -f 1)"
+echo "Registrando somente a hora e a integridade do backup no banco da demo..."
+psql --dbname="$DATABASE_URL" -X -q -v ON_ERROR_STOP=1 \
+  -v backup_sha="$sha" -v backup_size="$localSize" <<'SQL'
+INSERT INTO backup_verifications(id,verified_at,archive_size_bytes,sha256)
+VALUES (1, now(), :'backup_size'::bigint, :'backup_sha')
+ON CONFLICT (id) DO UPDATE
+SET verified_at=excluded.verified_at,
+    archive_size_bytes=excluded.archive_size_bytes,
+    sha256=excluded.sha256;
+SQL
+echo "Backup confirmado no bucket privado, recuperado e registrado no monitor. Bytes: $localSize"

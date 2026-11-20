@@ -22,6 +22,7 @@ jobs:
           grep -Fq 'DEMO_MODE' ops/backup/backup.sh
           grep -Fq 'pg_restore' ops/backup/backup.sh
           grep -Fq 'head-object' ops/backup/backup.sh
+          grep -Fq 'INSERT INTO backup_verifications' ops/backup/backup.sh
       - name: Compilar imagem isolada com cliente PostgreSQL e S3
         run: docker build -f ops/backup/Dockerfile -t agendaflow-dbbackup:check .
       - name: Garantir que modo sem configuracao falha fechado
