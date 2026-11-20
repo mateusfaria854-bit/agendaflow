@@ -16,7 +16,9 @@
     "db:migrate:runtime": "node dist/db/migrate.js",
     "db:seed:runtime": "node dist/db/seed.js",
     "admin:create:runtime": "node dist/db/create-admin.js",
-    "staff:provision:runtime": "node dist/db/provision-staff.js"
+    "staff:provision:runtime": "node dist/db/provision-staff.js",
+    "db:demo:cleanup": "tsx src/db/demo-cleanup.ts",
+    "db:demo:cleanup:runtime": "node dist/db/demo-cleanup.js"
   },
   "dependencies": {
     "@fastify/static": "^10.1.12",
