@@ -155,7 +155,7 @@ export default function Portal(){
     <div className="section-wrap">
       <div className="section-heading">
         <div><span className="section-tag">/ PLATAFORMA OPERACIONAL</span><h2>Contas e catálogo conectados.</h2></div>
-        <p>Cadastro e login reais, serviços e profissionais em PostgreSQL. Consulte horários, confirme reservas e acompanhe atendimentos em tempo real no ambiente local.</p>
+        <p>Cadastro e login funcionais com contas fictícias, catálogo conectado ao PostgreSQL e reservas verificadas pela API. Esta demonstração não deve receber dados pessoais reais.</p>
       </div>
       {notice&&<div className={`portal-notice ${notice.kind}`} role="status">{notice.text}</div>}
       <div className="portal-grid">

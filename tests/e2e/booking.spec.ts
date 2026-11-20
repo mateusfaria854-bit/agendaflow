@@ -27,6 +27,18 @@ async function login(page:import('@playwright/test').Page,email:string,passwordV
   await form.getByRole('button',{name:'Entrar na conta'}).click();
 }
 
+test('a demonstração publicada descreve funcionalidades reais e estado da API',async({page})=>{
+  await page.goto('/');
+  await expect(page.getByRole('heading',{name:'O próximo horário. Uma experiência melhor.'})).toBeVisible();
+  await expect(page.getByText('DEMONSTRAÇÃO ONLINE')).toBeVisible();
+  await expect(page.locator('.api-status')).toContainText('API conectada');
+  await expect(page.getByText('DEMO PUBLICADA')).toBeVisible();
+  await expect(page.getByText('CONCLUÍDA').first()).toBeVisible();
+  await expect(page.getByText('Gestão dos atendimentos')).toBeVisible();
+  await expect(page.getByText('Cadastro e login funcionais com contas fictícias', {exact:false})).toBeVisible();
+  await expect(page.getByText('API local conectada')).toHaveCount(0);
+});
+
 test('cliente reserva e cancela no navegador, sem reservas duplicadas',async({page},testInfo)=>{
   const email=`cliente-${testInfo.project.name}-${Date.now()}@example.invalid`;
   await page.goto('/#portal');

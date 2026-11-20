@@ -9,7 +9,7 @@ const features = [
   { number: '02', title: 'Serviços e profissionais', text: 'Catálogo de atendimentos, duração e especialidades.' },
   { number: '03', title: 'Disponibilidade', text: 'Expedientes, pausas, bloqueios e horários livres.' },
   { number: '04', title: 'Reservas', text: 'Agendar, acompanhar e cancelar com proteção contra conflitos.' },
-  { number: '05', title: 'Gestão e indicadores', text: 'Visão do negócio, operação diária e relatórios.' },
+  { number: '05', title: 'Gestão dos atendimentos', text: 'Calendário administrativo, reservas manuais e acompanhamento.' },
 ];
 
 const roadmap = [
@@ -18,7 +18,7 @@ const roadmap = [
   { phase: '02', name: 'Agenda disponível', summary: 'Expedientes, bloqueios e horários válidos calculados pela API.', current: false },
   { phase: '03', name: 'Reserva ponta a ponta', summary: 'Agendar, listar e cancelar sem dupla reserva.', current: false },
   { phase: '04', name: 'Operação administrativa', summary: 'Calendário, filtros, reserva manual e gestão de status.', current: false },
-  { phase: '05', name: 'Qualidade e publicação', summary: 'Testes no navegador, segurança e preparação para deploy.', current: true },
+  { phase: '05', name: 'Qualidade e publicação', summary: 'Testes automatizados e demonstração HTTPS na Railway.', current: true },
 ];
 
 function App() {
@@ -58,7 +58,7 @@ function App() {
       <main id="inicio" tabIndex={-1}>
         <section className="hero section-wrap" id="visao">
           <div className="hero-copy">
-            <div className="eyebrow"><span className="pulse" /> EM DESENVOLVIMENTO <span className="eyebrow-separator">/</span> FASE 05</div>
+            <div className="eyebrow"><span className="pulse" /> DEMONSTRAÇÃO ONLINE <span className="eyebrow-separator">/</span> MVP</div>
             <h1>O próximo horário.<br/><em>Uma experiência melhor.</em></h1>
             <p>Uma plataforma de agendamentos planejada para simplificar a rotina de clientes e equipes. Construída por etapas, com arquitetura clara e validações no servidor.</p>
             <div className="hero-actions">
@@ -101,7 +101,7 @@ function App() {
               </div>
               <div className="preview-status">
                 <span className="status-icon">✳</span>
-                <div><strong>Agenda sem conflitos.</strong><small>Integridade de horários garantida pelo banco na futura API.</small></div>
+                <div><strong>Agenda sem conflitos.</strong><small>Reservas sem conflitos verificadas pela API e pelo banco.</small></div>
               </div>
             </div>
             <div className="preview-footer"><span>PRÉVIA CONCEITUAL</span><span>01 / 05</span></div>
@@ -111,7 +111,7 @@ function App() {
         <section className="section-wrap modules-section" id="modulos">
           <div className="section-heading">
             <div><span className="section-tag">/ O PRODUTO</span><h2>O essencial, bem construído.</h2></div>
-            <p>Do cadastro à confirmação, cada módulo terá responsabilidades e regras verificáveis antes de entrar em produção.</p>
+            <p>Do cadastro à confirmação, o MVP demonstrativo possui responsabilidades definidas e regras verificadas por testes automatizados.</p>
           </div>
           <div className="feature-grid">{features.map(feature => (
             <article className="feature-card" key={feature.number}>
@@ -131,7 +131,7 @@ function App() {
               <div className={step.current ? 'timeline-item active' : 'timeline-item'} key={step.phase}>
                 <span className="timeline-index">{step.phase}</span>
                 <div className="timeline-body"><h3>{step.name}</h3><p>{step.summary}</p></div>
-                <span className="timeline-state">{step.current ? 'EM CONSTRUÇÃO' : 'PLANEJADO'}</span>
+                <span className="timeline-state">{step.current ? 'DEMO PUBLICADA' : 'CONCLUÍDA'}</span>
               </div>
             ))}</div>
           </div>
@@ -142,7 +142,7 @@ function App() {
         <div><span className="footer-brand">AgendaFlow</span><p>Planejamento e desenvolvimento por Mateus Faria Andrade · Engenharia de Software, UniRV.</p></div>
         <div className="api-status" role="status">
           <span className={api === 'online' ? 'status-light on' : 'status-light'} />
-          {api === 'checking' ? 'Verificando API...' : api === 'online' ? 'API local conectada' : 'API local não iniciada'}
+          {api === 'checking' ? 'Verificando API...' : api === 'online' ? 'API conectada' : 'API indisponível'}
         </div>
       </footer>
     </div>
