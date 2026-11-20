@@ -1,0 +1,73 @@
+name: Backup e restauração PostgreSQL (teste isolado)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '37 9 * * 1'
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/backup-restore.yml
+
+permissions:
+  contents: read
+
+jobs:
+  restauracao:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: postgresql://agendaflow:agendaflow_local@127.0.0.1:5432/agendaflow
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: agendaflow
+          POSTGRES_PASSWORD: agendaflow_local
+          POSTGRES_DB: agendaflow
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U agendaflow -d agendaflow"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Preparar banco fictício
+        run: |
+          npm install --no-audit --no-fund
+          npm run db:migrate
+          npm run db:seed
+      - name: Backup e restauração completa em outro banco descartável
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/agendaflow-backup"
+          docker run --rm --network host \
+            -e PGPASSWORD=agendaflow_local -v "$RUNNER_TEMP/agendaflow-backup:/backup" \
+            postgres:16-alpine pg_dump -h 127.0.0.1 -U agendaflow -d agendaflow \
+            -Fc --no-owner --no-acl -f /backup/agendaflow.dump
+          test -s "$RUNNER_TEMP/agendaflow-backup/agendaflow.dump"
+          docker run --rm --network host -e PGPASSWORD=agendaflow_local \
+            postgres:16-alpine createdb -h 127.0.0.1 -U agendaflow agendaflow_restore
+          docker run --rm --network host \
+            -e PGPASSWORD=agendaflow_local -v "$RUNNER_TEMP/agendaflow-backup:/backup" \
+            postgres:16-alpine pg_restore -h 127.0.0.1 -U agendaflow \
+            -d agendaflow_restore --no-owner --no-acl /backup/agendaflow.dump
+          check() {
+            docker run --rm --network host -e PGPASSWORD=agendaflow_local \
+              postgres:16-alpine psql -h 127.0.0.1 -U agendaflow \
+              -d agendaflow_restore -Atqc "$1"
+          }
+          test "$(check 'SELECT count(*) FROM services')" = 3
+          test "$(check 'SELECT count(*) FROM professionals')" = 2
+          test "$(check 'SELECT count(*) FROM schema_migrations')" = 2
+          test "$(check "SELECT count(*) FROM pg_constraint WHERE conname='appointments_no_overlap'")" = 1
+          echo "Backup restaurado e integridade básica confirmada em banco descartável."
+      - name: Excluir backup temporário local (não publicar dados)
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/agendaflow-backup"
