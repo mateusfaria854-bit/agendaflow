@@ -1,10 +1,12 @@
 # AgendaFlow
 
 [![Qualidade e banco](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/ci.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/ci.yml)
+[![Navegador E2E](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/e2e.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/e2e.yml)
+[![Contêiner de demonstração](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/container-demo.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/container-demo.yml)
 
 **Plataforma full-stack de agendamentos** em desenvolvimento, com React, TypeScript, Node.js, Fastify e PostgreSQL. O projeto segue **Spec-Driven Development (SDD)** e prioriza uma arquitetura clara, requisitos verificáveis e prevenção de reservas duplicadas.
 
-> **Estado atual: Fase 5, validação e preparação de demonstração.** Clientes reservam e cancelam, administradores operam a agenda e profissionais consultam seus próprios atendimentos. A etapa atual adiciona testes Playwright desktop/mobile, verificação de acessibilidade e proteções HTTP. **A aplicação ainda não foi implantada em servidor público**; instruções de deploy, backup e rollback estão documentadas.
+> **Estado atual: MVP full-stack com build Docker de demonstração.** Clientes reservam e cancelam, administradores gerenciam a agenda e profissionais consultam seus atendimentos. API Fastify e frontend React podem ser executados **na mesma origem HTTP/HTTPS**, com Docker, CI e E2E. **Ainda não existe deploy público validado:** faltam conectar um provedor e provisionar PostgreSQL/HTTPS, monitoramento e limites operacionais. Use somente dados fictícios.
 
 ## Objetivo
 
@@ -38,6 +40,7 @@ specs/
   005-operacao-administrativa/ Calendário e gestão administrativa
   006-area-profissional/       Complemento de acesso por profissional
   007-polimento-publicacao/    Testes E2E, segurança e preparação de demo
+  008-demo-hospedagem/        Docker e configuração para hospedar
   _templates/           Modelos de spec, plan e tasks
 docs/
   ARQUITETURA.md        Limites e fluxo entre camadas
@@ -47,6 +50,9 @@ docs/
 scripts/                Verificação SDD e de dependências
 .github/workflows/      CI
 compose.yaml            PostgreSQL local
+Dockerfile              Build multi-stage React + API Fastify na mesma origem
+.dockerignore           Evita incluir dados e dependências locais
+.github/workflows/container-demo.yml Smoke test da imagem Docker
 ```
 
 ## Instalação
@@ -142,6 +148,20 @@ O workflow [Navegador E2E e acessibilidade](.github/workflows/e2e.yml) inicializ
 
 Para rodar localmente, inicie API, Vite e PostgreSQL (veja [Guia Local](docs/GUIA_LOCAL.md)), execute `npx playwright install chromium` e `npm run test:e2e`. Para ativar também os testes de ADMIN e PROFISSIONAL, configure `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD`, `E2E_STAFF_EMAIL` e `E2E_STAFF_PASSWORD` com **credenciais fictícias de ambiente descartável**. Não aponte os testes para uma instância com clientes reais.
 
+### Preparar um deploy demonstrativo
+
+O projeto agora fornece um **Dockerfile único**. O build inclui o React compilado e a API Fastify; na imagem, `SERVE_WEB=true` permite acessar frontend e `/api/v1` na mesma origem, sem CORS entre dois serviços.
+
+```bash
+docker build -t agendaflow:demo .
+```
+
+A imagem exige `DATABASE_URL` de um PostgreSQL separado e, por segurança, `WEB_ORIGIN=https://seu-dominio` na execução com `NODE_ENV=production`. O banco **não** é incluído na imagem. O comando de migração compilada, sem dependências de desenvolvimento, é `npm run db:migrate:runtime -w @agendaflow/api`, executado no ambiente do serviço antes de iniciar a aplicação. Para um banco **descartável de demo**, o seed pode ser aplicado com `npm run db:seed:runtime -w @agendaflow/api`.
+
+Para uma demo aberta, configure `DEMO_MODE=true` no serviço: cadastros aceitam apenas endereços **fictícios @example.invalid**. Isso evita e-mails reais, mas ainda são necessários limites contra abuso, limpeza periódica do banco e monitoramento.
+
+[Guia passo a passo para Railway e outros provedores](docs/DEPLOY_DEMO.md). **Não** há link de aplicação pública até a implantação e verificação efetivas.
+
 ### Publicação demonstrativa
 
 A publicação externa ainda **não foi realizada**. O documento [Implantação demonstrativa](docs/DEPLOY_DEMO.md) explica hospedagem HTTPS sob uma origem única, variáveis de ambiente, verificações de saúde, backup PostgreSQL, restauração e rollback. Nenhuma URL de demonstração é anunciada sem estar ativa e verificada. Pagamentos, notificações, recuperação de senha e medidas completas de segurança operacional continuam fora do MVP.
@@ -155,13 +175,13 @@ npm run db:seed
 npm run db:verify
 ```
 
-O CI [Qualidade e banco](.github/workflows/ci.yml) executa build, testes, verificações arquiteturais, migrações e integração real com PostgreSQL. O workflow separado [E2E e acessibilidade](.github/workflows/e2e.yml) testa o navegador com dados fictícios. Ambos precisam passar no Pull Request. O seed é idempotente.
+O CI [Qualidade e banco](.github/workflows/ci.yml) executa build, testes, verificações arquiteturais, migrações e integração real com PostgreSQL. [E2E e acessibilidade](.github/workflows/e2e.yml) testa o navegador, e [Contêiner de demonstração](.github/workflows/container-demo.yml) compila a imagem e verifica frontend/API na mesma origem. **Os três workflows precisam passar antes do merge.** O seed é idempotente.
 
 ## Processo SDD
 
 Cada funcionalidade tem três documentos versionados em `specs/NNN-nome/`: `spec.md` (requisitos e aceite), `plan.md` (arquitetura e dados), e `tasks.md` (execução e testes). O conjunto de princípios está em [specs/constitution.md](specs/constitution.md).
 
-Especificações implementadas: [Fundação](specs/000-fundacao/spec.md), [Autenticação](specs/001-autenticacao/spec.md), [Catálogo](specs/002-catalogo/spec.md), [Disponibilidade](specs/003-disponibilidade/spec.md), [Agendamentos](specs/004-agendamentos/spec.md) e [Operação administrativa](specs/005-operacao-administrativa/spec.md), incluindo o [complemento de área profissional](specs/006-area-profissional/spec.md) e a [Fase 5](specs/007-polimento-publicacao/spec.md). A publicação externa depende de ambiente autorizado e de verificações reais.
+Especificações implementadas: [Fundação](specs/000-fundacao/spec.md), [Autenticação](specs/001-autenticacao/spec.md), [Catálogo](specs/002-catalogo/spec.md), [Disponibilidade](specs/003-disponibilidade/spec.md), [Agendamentos](specs/004-agendamentos/spec.md) e [Operação administrativa](specs/005-operacao-administrativa/spec.md), incluindo o [complemento de área profissional](specs/006-area-profissional/spec.md) e a [Fase 5](specs/007-polimento-publicacao/spec.md), incluindo a [preparação de deploy Docker](specs/008-demo-hospedagem/spec.md). A publicação externa depende de ambiente autorizado e de verificações reais.
 
 ## Próximas fases
 

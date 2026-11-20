@@ -180,7 +180,7 @@ export default function Portal(){
               <label>Senha<input type="password" autoComplete={authMode==='login'?'current-password':'new-password'} required minLength={authMode==='register'?12:1} value={password} onChange={e=>setPassword(e.target.value)} placeholder={authMode==='register'?'Mínimo de 12 caracteres':'Sua senha'}/></label>
               <button type="submit" className="portal-primary" disabled={busy}>{busy?'Processando...':authMode==='login'?'Entrar na conta':'Cadastrar cliente'} <span aria-hidden="true">↗</span></button>
             </form>
-            <p className="portal-caption">Contas são armazenadas no PostgreSQL local. Não utilize senhas de serviços reais neste ambiente de estudo.</p>
+            <p className="portal-caption">Ambiente de demonstração: utilize somente nomes e e-mails fictícios e uma senha exclusiva. Nunca informe dados pessoais reais.</p>
           </>}
         </div>
 

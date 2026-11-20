@@ -1,4 +1,6 @@
 import Fastify from 'fastify';
+import fastifyStatic from '@fastify/static';
+import { fileURLToPath } from 'node:url';
 import { APP_NAME, type HealthResponse, type ReadyResponse } from '@agendaflow/shared';
 import { checkDatabase } from './db/client.js';
 import { authRoutes } from './modules/auth/routes.js';
@@ -9,7 +11,7 @@ import {appointmentRoutes} from './modules/appointments/routes.js';
 import {adminAppointmentRoutes} from './modules/admin/routes.js';
 import {staffRoutes} from './modules/staff/routes.js';
 
-type Options = { databaseCheck?: () => Promise<boolean>; logger?: boolean };
+type Options = { databaseCheck?: () => Promise<boolean>; logger?: boolean; serveWeb?: boolean; webRoot?: string };
 
 /** Factory: a API pode ser testada sem abrir porta HTTP externa. */
 export function createApp(options: Options = {}) {
@@ -57,7 +59,26 @@ export function createApp(options: Options = {}) {
   app.register(adminAppointmentRoutes, {prefix:'/api/v1'});
   app.register(staffRoutes, {prefix:'/api/v1'});
 
-  app.get('/', async() => ({name:APP_NAME,phase:4}));
+  const serveWeb=options.serveWeb ?? (process.env.SERVE_WEB === 'true');
+  if (serveWeb) {
+    // Mantém cookies e /api/v1 na mesma origem, sem CORS entre dois serviços.
+    const root=options.webRoot ?? fileURLToPath(new URL('../../web/dist/', import.meta.url));
+    app.register(fastifyStatic,{root,prefix:'/',wildcard:false});
+    app.setNotFoundHandler((request,reply)=>{
+      // Um endpoint da API inválido nunca pode retornar a página HTML do React.
+      if(request.method!=='GET'||request.url.startsWith('/api/')){
+        return reply.code(404).send({error:'Rota não encontrada.'});
+      }
+      const pathname=new URL(request.url,'http://localhost').pathname;
+      // Um asset inexistente não deve receber HTML com status 200.
+      if(pathname.includes('.') || pathname.startsWith('/.')){
+        return reply.code(404).send({error:'Arquivo não encontrado.'});
+      }
+      return reply.header('Cache-Control','no-cache').type('text/html').sendFile('index.html');
+    });
+  }else{
+    app.get('/', async() => ({name:APP_NAME,phase:5}));
+  }
   app.setErrorHandler((error,_request,reply) => {
     const err = error as { statusCode?: number; message?: string };
     const status = err.statusCode && err.statusCode >= 400 && err.statusCode < 500

@@ -12,9 +12,14 @@
     "db:seed": "tsx src/db/seed.ts",
     "db:verify": "tsx src/db/verify.ts",
     "admin:create": "tsx src/db/create-admin.ts",
-    "staff:provision": "tsx src/db/provision-staff.ts"
+    "staff:provision": "tsx src/db/provision-staff.ts",
+    "db:migrate:runtime": "node dist/db/migrate.js",
+    "db:seed:runtime": "node dist/db/seed.js",
+    "admin:create:runtime": "node dist/db/create-admin.js",
+    "staff:provision:runtime": "node dist/db/provision-staff.js"
   },
   "dependencies": {
+    "@fastify/static": "^10.1.12",
     "@agendaflow/shared": "0.1.0",
     "dotenv": "^16.4.7",
     "fastify": "^5.2.1",

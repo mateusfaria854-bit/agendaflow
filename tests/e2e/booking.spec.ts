@@ -54,7 +54,7 @@ test('cliente reserva e cancela no navegador, sem reservas duplicadas',async({pa
   await expect(own.getByText('Pat Demo')).toBeVisible();
   await page.once('dialog',dialog=>dialog.accept());
   await own.getByRole('button',{name:'Cancelar'}).click();
-  await expect(own.getByText('Cancelado')).toBeVisible();
+  await expect(own.locator('.af-booking-date small').filter({hasText:/^Cancelado$/})).toBeVisible();
   await expect(own.getByText('Corte clássico')).toBeVisible();
   const response=await page.request.get('/api/v1/admin/appointments?from=2026-11-01&to=2026-11-01');
   expect(response.status()).toBe(403);
