@@ -1,6 +1,6 @@
 # Implantação demonstrativa: guia operacional
 
-> **Status:** guia de preparação. Não há URL de produção ou deploy de serviços externos realizado automaticamente. Os dados devem ser fictícios.
+> **Status (20/11/2026):** a demonstração foi implantada na Railway e o smoke test externo de DNS/TLS, frontend, API e PostgreSQL passou no GitHub Actions. URL de demo: [AgendaFlow](https://agendaflow-web-production.up.railway.app/). **Ambiente demonstrativo, não adequado a dados reais de clientes.**
 
 ## Arquitetura de hospedagem
 
@@ -71,6 +71,22 @@ Não execute restauração sobre produção sem plano de interrupção e confirm
 ## Pendências antes de produção real
 
 Política de retenção/eliminação de dados pessoais, recuperação de senha, limitação de requisições entre múltiplas instâncias, revisão jurídica LGPD, proteção contra abuso/cadastro automatizado, backups automáticos com testes de restauração, alertas e auditoria de segurança. O MVP é adequado para demonstração com dados fictícios, não para operar clientes reais sem essas medidas.
+
+## Railway: implantação executada e configuração de referência
+
+Configuração aplicada em `agendaflow-demo`, ambiente `production`: um serviço `agendaflow-web` originado de `mateusfaria854-bit/agendaflow` (branch `main`) e um serviço privado `Postgres` com volume persistente. A API e o site React compartilham a mesma origem HTTPS. O domínio da Railway está direcionado à porta interna que a aplicação escuta (`8080`, atribuída pela Railway), e o healthcheck usa `/api/v1/ready`.
+
+O serviço web define `DATABASE_URL` como referência a `${{Postgres.DATABASE_URL}}` no painel (sem publicar a senha), além de `NODE_ENV=production`, `SERVE_WEB=true`, `HOST=0.0.0.0`, `BUSINESS_TIMEZONE=America/Sao_Paulo`, `DEMO_MODE=true` e `WEB_ORIGIN=https://agendaflow-web-production.up.railway.app`. O pre-deploy executa `npm run db:demo:bootstrap`, que aplica migrações e seed fictício idempotente. **Não usar esse seed automaticamente em bancos reais.**
+
+O workflow [Disponibilidade da demo HTTPS](../.github/workflows/demo-uptime.yml) verifica externamente a resolução DNS, TLS, `/api/v1/health`, `/api/v1/ready`, frontend e favicon a cada 6 horas e pode ser acionado manualmente. O primeiro teste de 20/11/2026 passou; a disponibilidade futura depende do provedor, da rede e das próximas versões.
+
+### Verificação operacional ainda necessária
+
+- Definir retenção e expurgo automático de contas e agendamentos de demonstração, com política para sessões expiradas.
+- Configurar backup automático e **testar a restauração em ambiente isolado**; o volume persistente sozinho não equivale a backup.
+- Adicionar limites de abuso adequados a múltiplas réplicas e proteger rotas sensíveis contra tráfego excessivo.
+- Configurar alertas operacionais e monitoramento de recursos e erros; o teste agendado de disponibilidade é apenas uma verificação periódica.
+- Revisar a conformidade LGPD e manter a demo restrita a informações fictícias.
 
 ## Caminho sugerido: Railway com um único serviço web e PostgreSQL gerenciado
 
