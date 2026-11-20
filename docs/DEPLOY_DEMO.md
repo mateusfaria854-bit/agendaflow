@@ -113,7 +113,7 @@ Para criar contas ADMIN/PROFISSIONAL fictícias em ambiente controlado, configur
 
 ### Proteção do modo demo
 
-Com `DEMO_MODE=true`, o cadastro de clientes rejeita e-mails fora de `@example.invalid`. O usuário deve utilizar nomes fictícios e uma senha descartável, nunca sua senha pessoal. O modo demo não garante anonimização completa, não impede abuso automatizado e não implementa expurgo automático. **Não abra o serviço para o público antes de definir retenção, limitação de requisições e monitoramento.**
+Com `DEMO_MODE=true`, o cadastro de clientes rejeita e-mails fora de `@example.invalid` e aplica um limite simples de **5 tentativas por IP a cada 15 minutos** na memória da instância (HTTP 429 em excesso). O usuário deve utilizar nomes fictícios e uma senha descartável, nunca sua senha pessoal. O limite em memória não é distribuído entre réplicas e, por depender do IP visto pelo servidor atrás de um proxy, pode agrupar visitantes sob o mesmo endereço; uma proteção de borda ou store compartilhado continua necessária para operação pública de longo prazo. O modo demo não garante anonimização completa, não impede abuso automatizado e não implementa expurgo automático. **Não abra o serviço para o público antes de definir retenção, limitação de requisições e monitoramento.**
 
 ### Validação antes de compartilhar a URL
 
