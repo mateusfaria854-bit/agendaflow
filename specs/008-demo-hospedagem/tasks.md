@@ -6,5 +6,5 @@
 - [x] T-804: Criar scripts runtime compilados de migração e seed.
 - [x] T-805: Criar testes de resposta estática e workflow de build Docker.
 - [x] T-806: Documentar os passos da demo, segurança, dados fictícios e limites.
-- [ ] T-807: Validar todos os checks, mesclar na main e confirmar exclusão da branch.
+- [x] T-807: Build, API/PostgreSQL, Playwright e contêiner aprovados no PR #14; squash merge feito na main e branch removida.
 - [ ] T-808: Conectar serviço de hospedagem e publicar URL real após verificação da infraestrutura.
