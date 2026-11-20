@@ -64,11 +64,13 @@ specs/
   006-area-profissional/       Complemento de acesso por profissional
   007-polimento-publicacao/    Testes E2E, segurança e preparação de demo
   008-demo-hospedagem/        Docker e configuração para hospedar
+  009-retencao-demo/          Regras, testes e operação de limpeza controlada
   _templates/           Modelos de spec, plan e tasks
 docs/
   media/                Prints reais e GIF do sistema
   ARQUITETURA.md        Limites e fluxo entre camadas
   GUIA_LOCAL.md         Instalação e execução
+  RETENCAO_DEMO.md      Retenção segura e limpeza controlada da demo
   ROADMAP.md            Fases do MVP
   adr/                  Decisões arquiteturais
 scripts/                Verificação SDD e de dependências
@@ -185,6 +187,12 @@ A imagem exige `DATABASE_URL` de um PostgreSQL separado e, por segurança, `WEB_
 Para uma demo aberta, configure `DEMO_MODE=true` no serviço: cadastros aceitam apenas endereços **fictícios @example.invalid**, com limite conservador de 5 tentativas de cadastro por IP a cada 15 minutos na instância de API. Essa proteção em memória não substitui limites distribuídos na borda. Isso evita e-mails reais, mas ainda são necessários limites contra abuso, limpeza periódica do banco e monitoramento.
 
 [Guia passo a passo para Railway e outros provedores](docs/DEPLOY_DEMO.md). A demonstração foi implantada e passou na checagem externa HTTPS em 20/11/2026. Evite inserir dados pessoais, senhas reutilizadas ou clientes reais.
+
+### Retenção e limpeza segura da demonstração
+
+O AgendaFlow agora possui um comando de manutenção com **simulação por padrão**, testes PostgreSQL e bloqueio explícito contra uso fora do modo demo. Só considera clientes fictícios com idade e última atividade superiores a 30 dias, sem horários recentes/futuros, e exclui suas dependências em transação. **A exclusão automática continua desativada** até habilitar backups do Postgres da Railway e testar a restauração de um desses backups.
+
+Guia: [Retenção de dados fictícios](docs/RETENCAO_DEMO.md). O workflow de backup/restauração existente testa apenas bancos descartáveis, não o volume hospedado.
 
 ### Publicação demonstrativa
 

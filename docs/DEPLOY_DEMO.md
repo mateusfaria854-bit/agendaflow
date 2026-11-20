@@ -82,6 +82,8 @@ O workflow [Disponibilidade da demo HTTPS](../.github/workflows/demo-uptime.yml)
 
 ### Verificação operacional ainda necessária
 
+A rotina de retenção já foi implementada, mas está **desabilitada para exclusões na Railway** até a realização de um backup do volume hospedado e uma restauração testada desse backup. Confira [Retenção de dados fictícios](RETENCAO_DEMO.md).
+
 - Definir retenção e expurgo automático de contas e agendamentos de demonstração, com política para sessões expiradas.
 - Configurar backup automático e **testar a restauração em ambiente isolado**; o volume persistente sozinho não equivale a backup.
 - Adicionar limites de abuso adequados a múltiplas réplicas e proteger rotas sensíveis contra tráfego excessivo.
@@ -96,7 +98,7 @@ O repositório possui `Dockerfile` na raiz e não usa configuração Railway des
 2. Adicione um banco PostgreSQL gerenciado pelo provedor, mantendo a conexão na rede privada do projeto. Configure a variável `DATABASE_URL` no serviço web como referência ao `DATABASE_URL` do serviço PostgreSQL, usando a interface de variáveis do Railway. Evite expor o banco à internet.
 3. Configure as variáveis do serviço web: `NODE_ENV=production`, `SERVE_WEB=true`, `HOST=0.0.0.0`, `BUSINESS_TIMEZONE=America/Sao_Paulo`, `DEMO_MODE=true` e `WEB_ORIGIN=https://DOMINIO_PUBLICO_VALIDO`. O valor de `PORT` será fornecido pelo provedor, não fixe um valor conflitante.
 4. Gere/configure o domínio HTTPS do serviço web no painel do provedor. Só então defina `WEB_ORIGIN` com a origem exata do domínio, sem barra no fim, antes de liberar o site. Se o provedor fornecer a variável `RAILWAY_PUBLIC_DOMAIN`, ela contém apenas o hostname, então use o prefixo `https://`.
-5. Configure o comando **pre-deploy** da aplicação como `npm run db:migrate:runtime -w @agendaflow/api && npm run db:seed:runtime -w @agendaflow/api` somente no **banco descartável da demonstração**. O seed é idempotente e nunca cria usuários/senhas padrão. Em ambiente real, remova o seed do pre-deploy.
+5. Configure o comando **pre-deploy** da aplicação como `npm run db:demo:bootstrap` somente no **banco descartável da demonstração**. O seed é idempotente e nunca cria usuários/senhas padrão. Em ambiente real, remova o seed do pre-deploy.
 6. Defina o healthcheck como `/api/v1/ready`. A aplicação só ficará pronta quando conectar ao PostgreSQL. Depois verifique `/api/v1/health`, `/api/v1/ready`, `/`, `/favicon.svg` e o fluxo de reserva/cancelamento sob HTTPS.
 7. Configure limites contra abuso e monitoramento externo, faça teste de backup/restauração e defina política de expurgo/reset das contas e reservas de demonstração. Não publique a URL no README até tudo passar.
 
