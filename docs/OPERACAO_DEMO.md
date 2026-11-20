@@ -8,9 +8,9 @@ As cópias de segurança e o banco devem permanecer privados. Não publique vari
 
 ## Checagem de disponibilidade
 
-Workflow [Disponibilidade da demo HTTPS](../.github/workflows/demo-uptime.yml) (a cada seis horas) verifica DNS, TLS, `/api/v1/health`, `/api/v1/ready`, HTML e favicon.
+Workflow [Disponibilidade da demo HTTPS](../.github/workflows/demo-uptime.yml) (a cada seis horas) verifica DNS, TLS, `/api/v1/health`, `/api/v1/ready`, `/api/v1/backups/ready`, HTML e favicon. O endpoint de backup retorna HTTP 503 quando não há cópia verificada nas últimas 36 horas.
 
-Quando o workflow falha, abre ou atualiza uma issue com o label `agenda-demo-uptime`. Quando passa, encerra automaticamente a issue aberta. Incidentes duplicados são evitados por label.
+Quando o workflow falha, inclusive quando o cron de backup deixa de registrar uma cópia nova, abre ou atualiza uma issue com o label `agenda-demo-uptime`. Quando passa, encerra automaticamente a issue aberta. Incidentes duplicados são evitados por label.
 
 Isso registra falhas no GitHub, **não garante push, e-mail, SMS ou resposta imediata**. O intervalo de 6 horas pode atrasar a detecção.
 
@@ -30,7 +30,7 @@ A API envia `Cache-Control: no-store`, `X-Content-Type-Options`, `X-Frame-Option
 ## Pendências
 
 - Habilitar snapshots nativos do volume PostgreSQL na aba Backups do Railway.
-- Definir ciclo de vida/retencão dos objetos no bucket e alertas para falhas e ausência de backups.
+- Definir retenção segura dos objetos S3 (Railway Bucket não suporta lifecycle nativo) e alertas com notificações fora do GitHub; o alerta de ausência de cópia verificada está ativo via issue.
 - Verificar periodicamente a restauração operacional de um arquivo do bucket para um banco de recuperação isolado.
 - Avaliar disponibilidade com intervalos menores e canal de notificação.
 - Manter o expurgo automático de contas de demonstração desabilitado até essas verificações.

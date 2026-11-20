@@ -66,6 +66,7 @@ specs/
   007-polimento-publicacao/    Testes E2E, segurança e preparação de demo
   008-demo-hospedagem/        Docker e configuração para hospedar
   009-retencao-demo/          Regras, testes e operação de limpeza controlada
+  010-vigilancia-backups/     Monitoramento automático de cópias verificadas
   _templates/           Modelos de spec, plan e tasks
 docs/
   media/                Prints reais e GIF do sistema
@@ -192,7 +193,7 @@ Para uma demo aberta, configure `DEMO_MODE=true` no serviço: cadastros aceitam 
 
 ### Monitoramento e incidentes
 
-O workflow [Disponibilidade da demo HTTPS](.github/workflows/demo-uptime.yml) verifica DNS, TLS, frontend, API e PostgreSQL a cada 6 horas. Se um teste falhar, ele **abre ou atualiza uma issue** com o rótulo `agenda-demo-uptime`; após a recuperação, encerra o incidente automaticamente. Esses alertas são registrados no GitHub, e não equivalem a uma plataforma 24/7 com notificações garantidas. Ver [guia operacional](docs/OPERACAO_DEMO.md).
+O workflow [Disponibilidade da demo HTTPS](.github/workflows/demo-uptime.yml) verifica DNS, TLS, frontend, API, PostgreSQL e **o backup verificado nas últimas 36 horas** a cada 6 horas. Se um teste falhar, inclusive por backup ausente ou antigo, ele **abre ou atualiza uma issue** com o rótulo `agenda-demo-uptime`; após a recuperação, encerra o incidente automaticamente. Esses alertas são registrados no GitHub, e não equivalem a uma plataforma 24/7 com notificações garantidas. Ver [guia operacional](docs/OPERACAO_DEMO.md).
 
 ### Retenção e limpeza segura da demonstração
 
@@ -207,6 +208,8 @@ Uma instância de demonstração foi **implantada na Railway em 20/11/2026** (`a
 A implantação segue a branch `main` e usa `DEMO_MODE=true`, que restringe cadastros públicos a e-mails **fictícios** `@example.invalid`. Uma URL pública **não significa produção comercial pronta**: faltam proteção contra abuso distribuído, política de retenção/expurgo, backup nativo do volume, alertas operacionais, observabilidade completa e revisão LGPD. O backup lógico independente já foi validado. **Não cadastrar clientes reais, nem usar senhas pessoais.** Pagamentos, notificações e recuperação de senha não fazem parte do MVP. Consulte o [Guia de implantação](docs/DEPLOY_DEMO.md) para operação, backup e rollback.
 
 ### Backup e restauração em ambiente de testes
+
+**Monitor de backup:** após restaurar o dump e validar a recuperação do S3, o job registra somente a hora e a integridade da cópia no banco. `/api/v1/backups/ready` retorna `fresh` ou HTTP 503 sem expor nomes, hashes ou credenciais; o workflow externo detecta ausência de cópias por mais de 36 horas. A exclusão automática de contas e o vencimento de arquivos S3 continuam desativados.
 
 O workflow [Backup e restauração PostgreSQL](.github/workflows/backup-restore.yml) executa `pg_dump` e `pg_restore` com **dados sintéticos em banco isolado** e verifica tabelas, migrações e a restrição contra reservas sobrepostas. Esse teste foi aprovado. **Além dele**, um serviço de backup privado na Railway executou com sucesso `pg_dump`, `pg_restore` em PostgreSQL temporário e upload/download S3 com comparação de bytes. O job segue um agendamento diário de 03:20 UTC. Consulte o [guia de backup da Railway](docs/BACKUP_RAILWAY.md). Os snapshots nativos do volume e a retenção/alertas do bucket ainda precisam ser configurados.
 

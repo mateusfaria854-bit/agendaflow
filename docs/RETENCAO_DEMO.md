@@ -26,7 +26,7 @@ Somente depois de comprovar backups periódicos, capacidade de recuperação do 
 DEMO_MODE=true DEMO_MAINTENANCE_ENABLED=true npm run db:demo:cleanup -w @agendaflow/api -- --execute
 ```
 
-**Não execute esse comando automaticamente na Railway enquanto a retenção e os alertas dos backups estiverem pendentes.** A rotina usa transação, limite por lote, bloqueio de concorrência, rollback e exclusão ordenada de auditoria, sessões, reservas e contas. Também limpa sessões expiradas.
+**Não execute esse comando automaticamente na Railway enquanto a retenção dos objetos S3 e a recuperação operacional estiverem pendentes.** Existe alerta de cópia atrasada via GitHub Actions, mas ele não substitui snapshots de volume, versionamento ou retenção definida. A rotina usa transação, limite por lote, bloqueio de concorrência, rollback e exclusão ordenada de auditoria, sessões, reservas e contas. Também limpa sessões expiradas.
 
 Configurações: `DEMO_RETENTION_DAYS` (30 a 365, padrão 30) e `DEMO_CLEANUP_BATCH` (1 a 100, padrão 50). Uma segunda execução é idempotente para o mesmo lote. Use sempre dados fictícios.
 
