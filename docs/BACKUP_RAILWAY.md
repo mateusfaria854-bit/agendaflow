@@ -46,6 +46,10 @@ O Cron Schedule já está configurado como `20 3 * * *` (03:20 UTC, 00:20 em Sã
 
 **Pendências operacionais:** confirmar a primeira execução automática na janela agendada, definir e implantar política de retenção do bucket, realizar um ensaio de recuperação manual a partir do bucket em serviço independente e preferencialmente habilitar também o backup nativo de volume. Um alerta básico de cópia atrasada já está ativo via GitHub Actions/Issues, com frequência de seis horas. O download e comparação do objeto armazenado já foram verificados no job. O bucket e o job podem gerar cobrança por armazenamento e execução.
 
+## Inventário seguro da retenção
+
+O job agora dispõe de um cálculo de retenção **somente leitura**: `ops/backup/retention.py`, executado após o backup completo e a comprovação do download S3. A rotina preserva um mínimo de 30 dias e as 14 cópias mais recentes, bloqueia inventários inconsistentes ou com cópia recente ausente e não contém comandos de exclusão. Consulte [Retenção de backups](RETENCAO_BACKUPS.md). Sua saída é apenas estatística, sem chaves privadas; a falta de 14 cópias nos primeiros dias gera uma prévia bloqueada, sem invalidar um backup íntegro.
+
 ## Política de retenção do bucket
 
 A política proposta para este ambiente fictício é manter pelo menos **30 dias** de dumps íntegros e verificar uma restauração operacional antes de apagar qualquer arquivo. **Nenhum objeto é apagado automaticamente por este projeto.** Railway Buckets ainda não oferecem configuração nativa de ciclo de vida S3; portanto, não configure `put-bucket-lifecycle-configuration` presumindo que será executado. Quando o expurgo de backups for implementado, deverá preservar múltiplas cópias íntegros, usar prévia por padrão e exigir aprovação antes de exclusões definitivas.

@@ -27,6 +27,10 @@ Isso registra falhas no GitHub, **não garante push, e-mail, SMS ou resposta ime
 
 A API envia `Cache-Control: no-store`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` e `Permissions-Policy`; em produção, também envia HSTS. Os cadastros da demo aceitam apenas `@example.invalid` e usam limite local conservador por IP. Não há proteção distribuída de borda.
 
+## Retenção dos backups
+
+O script [retention.py](../ops/backup/retention.py) calcula apenas uma prévia da retenção S3 (mínimo 30 dias e últimas 14 cópias preservadas). Mesmo quando mostra uma estimativa de arquivos antigos, **nenhum arquivo é apagado**. Consulte [guia de retenção S3](RETENCAO_BACKUPS.md). Não inserir credenciais do bucket em issues ou logs.
+
 ## Pendências
 
 - Habilitar snapshots nativos do volume PostgreSQL na aba Backups do Railway.

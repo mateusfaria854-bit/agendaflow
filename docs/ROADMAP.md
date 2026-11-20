@@ -26,3 +26,7 @@ Novas funcionalidades devem ter especificação, plano e tarefas antes do códig
 ### 010 · Vigilância de backup (20/11/2026)
 
 Migração de verificação de cópias aplicada. Após restaurar um backup em servidor temporário e recuperar o objeto do bucket S3, o cron registra a hora do último backup íntegro. A API responde em `/api/v1/backups/ready` sem expor credenciais; o monitor externo abre uma issue se a cópia ficar ausente ou tiver mais de 36 horas. A execução manual e o teste externo passaram. Permanecem pendentes snapshots nativos do volume, política de retenção do bucket e validação da primeira execução cron diária.
+
+### 011 · Prévia de retenção do bucket privado
+
+Inventário S3 paginado, com proteção de 30 dias e 14 cópias mais recentes, realizado somente em modo leitura após backup validado. O código recusa `--execute`, e a rotina não faz nenhuma exclusão. A aprovação de CI, a aplicação da nova imagem na Railway e uma primeira execução automática do cron são etapas de validação separadas. A política de expiração definitiva continua desativada.

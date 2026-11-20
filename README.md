@@ -191,6 +191,10 @@ Para uma demo aberta, configure `DEMO_MODE=true` no serviço: cadastros aceitam 
 
 [Guia passo a passo para Railway e outros provedores](docs/DEPLOY_DEMO.md). A demonstração foi implantada e passou na checagem externa HTTPS em 20/11/2026. Evite inserir dados pessoais, senhas reutilizadas ou clientes reais.
 
+### Política de retenção das cópias S3 (prévia segura)
+
+O serviço de backup inclui um **inventário somente leitura** do bucket privado: preserva no mínimo 30 dias e as 14 cópias mais recentes, e bloqueia decisões quando faltam cópias, o inventário é incompleto ou há objetos inesperados. **Não apaga nenhum arquivo.** A execução real de expurgo foi deliberadamente excluída desta fase. Veja o [guia de retenção de backups](docs/RETENCAO_BACKUPS.md) e os [testes](ops/backup/test_retention.py).
+
 ### Monitoramento e incidentes
 
 O workflow [Disponibilidade da demo HTTPS](.github/workflows/demo-uptime.yml) verifica DNS, TLS, frontend, API, PostgreSQL e **o backup verificado nas últimas 36 horas** a cada 6 horas. Se um teste falhar, inclusive por backup ausente ou antigo, ele **abre ou atualiza uma issue** com o rótulo `agenda-demo-uptime`; após a recuperação, encerra o incidente automaticamente. Esses alertas são registrados no GitHub, e não equivalem a uma plataforma 24/7 com notificações garantidas. Ver [guia operacional](docs/OPERACAO_DEMO.md).
