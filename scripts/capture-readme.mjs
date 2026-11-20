@@ -35,7 +35,7 @@ async function align(page, selector) {
 let frame=0;
 async function shot(page, filename,selector) {
   if(selector)await align(page,selector);
-  await page.screenshot({path:join(root,filename),animations:'disabled',caret:'hide'});
+  await page.screenshot({path:join(root,filename),type:'jpeg',quality:82,animations:'disabled',caret:'hide'});
 }
 async function gifFrame(page,selector) {
   if(selector)await align(page,selector);
@@ -51,11 +51,11 @@ try {
   const page=await desktop.newPage();
   await page.goto(base+'/',{waitUntil:'networkidle'});
   await page.evaluate(()=>document.fonts.ready);
-  await expect(page.locator('.portal-catalog').getByText('Corte clássico')).toBeVisible();
-  await shot(page,'01-inicio.png','#visao');
+  await expect(page.locator('.portal-catalog .portal-service-grid').getByRole('heading',{name:'Corte clássico',exact:true})).toBeVisible();
+  await shot(page,'01-inicio.jpg','#visao');
 
   await gifFrame(page,'.portal-grid');
-  await shot(page,'02-catalogo.png','.portal-grid');
+  await shot(page,'02-catalogo.jpg','.portal-grid');
 
   await page.locator('.portal-tabs').getByRole('button',{name:'Criar conta'}).click();
   const form=page.locator('.portal-panel .portal-form').first();
@@ -75,7 +75,7 @@ try {
   await availability.getByRole('button',{name:'Consultar horários'}).click();
   await expect(availability.locator('.af-booking-slot').first()).toBeVisible();
   await gifFrame(page,'#horarios');
-  await shot(page,'03-horarios.png','#horarios');
+  await shot(page,'03-horarios.jpg','#horarios');
   await availability.locator('.af-booking-slot').first().click();
   await expect(availability.getByRole('button',{name:'Confirmar agendamento'})).toBeVisible();
   await gifFrame(page,'#horarios');
@@ -84,7 +84,7 @@ try {
   const own=page.locator('#minhas-reservas');
   await expect(own.getByText('Corte clássico')).toBeVisible();
   await gifFrame(page,'#minhas-reservas');
-  await shot(page,'04-minhas-reservas.png','#minhas-reservas');
+  await shot(page,'04-minhas-reservas.jpg','#minhas-reservas');
 
   const admin=await desktop.newPage();
   await admin.goto(base+'/#portal',{waitUntil:'networkidle'});
@@ -99,17 +99,17 @@ try {
   await cal.getByLabel('Até',{exact:true}).fill(date);
   await cal.getByRole('button',{name:'Aplicar filtros'}).click();
   await expect(cal.locator('.admin-appointment-row').first()).toBeVisible();
-  await shot(admin,'05-admin.png','#admin-calendario');
+  await shot(admin,'05-admin.jpg','#admin-calendario');
 
   const mobile=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:1,isMobile:true,hasTouch:true,colorScheme:'dark',reducedMotion:'reduce'});
   const mob=await mobile.newPage();
   await mob.goto(base+'/',{waitUntil:'networkidle'});
   await mob.evaluate(()=>document.fonts.ready);
-  await expect(mob.locator('.portal-catalog').getByText('Corte clássico')).toBeVisible();
-  await shot(mob,'06-mobile.png','#visao');
+  await expect(mob.locator('.portal-catalog .portal-service-grid').getByRole('heading',{name:'Corte clássico',exact:true})).toBeVisible();
+  await shot(mob,'06-mobile.jpg','#visao');
   await mobile.close();
   await desktop.close();
-  console.log(`Capturas reais geradas: 6 PNGs e ${frame} quadros de GIF.`);
+  console.log(`Capturas reais geradas: 6 JPGs e ${frame} quadros de GIF.`);
 } finally {
   await browser.close();
 }
