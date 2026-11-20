@@ -29,7 +29,7 @@ A infraestrutura real foi provisionada no projeto `agendaflow-demo`, ambiente `p
 
 ## Verificação reforçada de recuperação (atualização)
 
-O procedimento passou a testar a restauração completa **também do arquivo recuperado do bucket privado**, em um segundo banco descartável, antes de registrar a integridade do backup. Os dois bancos temporários são destruídos ao final. Isso reduz a dependência da simples comparação de bytes e valida que a versão armazenada realmente pode ser restaurada. A validação é independente do banco hospedado e não substitui um exercício operacional completo de recuperação em outro serviço Railway. A implantação da nova imagem e sua primeira execução precisam ser conferidas separadamente.
+O procedimento passou a testar a restauração completa **também do arquivo recuperado do bucket privado**, em um segundo banco descartável, antes de registrar a integridade do backup. Os dois bancos temporários são destruídos ao final. Isso reduz a dependência da simples comparação de bytes e valida que a versão armazenada realmente pode ser restaurada. A validação é independente do banco hospedado e não substitui um exercício operacional completo de recuperação em outro serviço Railway. A segunda restauração do arquivo baixado já passou em uma execução manual de validação contra a demo em 20/11/2026. A primeira execução efetivamente agendada ainda precisa ser conferida.
 
 ## Configuração na Railway
 
@@ -55,7 +55,7 @@ O Cron Schedule já está configurado como `20 3 * * *` (03:20 UTC, 00:20 em Sã
 
 ## Inventário seguro da retenção
 
-O job agora dispõe de um cálculo de retenção **somente leitura**: `ops/backup/retention.py`, executado após o backup completo e a comprovação do download S3. A rotina preserva um mínimo de 30 dias e as 14 cópias mais recentes, bloqueia inventários inconsistentes ou com cópia recente ausente e não contém comandos de exclusão. Consulte [Retenção de backups](RETENCAO_BACKUPS.md). Sua saída é apenas estatística, sem chaves privadas; a falta de 14 cópias nos primeiros dias gera uma prévia bloqueada, sem invalidar um backup íntegro.
+O job agora dispõe de um cálculo de retenção **somente leitura**: `ops/backup/retention.py`, executado após o backup completo e a comprovação do download S3. A rotina preserva um mínimo de 30 dias e as 14 cópias mais recentes, bloqueia inventários inconsistentes ou com cópia recente ausente e não contém comandos de exclusão. Consulte [Retenção de backups](RETENCAO_BACKUPS.md). Sua saída é apenas estatística, sem chaves privadas. O job distingue nos logs uma prévia aceita, uma prévia bloqueada por proteção (por exemplo, menos de 14 cópias) e uma falha de inventário. O bloqueio não invalida um backup íntegro.
 
 ## Política de retenção do bucket
 

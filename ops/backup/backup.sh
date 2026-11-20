@@ -118,6 +118,13 @@ echo "Backup confirmado no bucket privado, recuperado e registrado no monitor. B
 # Inventário SOMENTE LEITURA, após concluir o backup com sucesso.
 # Se falhar, não reclassificar a cópia válida como backup fracassado.
 echo "Simulando política de retenção sem excluir qualquer arquivo..."
-if ! python3 /usr/local/bin/agendaflow-retention-preview.py; then
-  echo "Aviso: inventário de retenção indisponível ou bloqueado; nenhuma cópia foi excluída." >&2
+preview_code=0
+# O utilitario imprime apenas contagens agregadas e motivo de bloqueio, sem chaves S3.
+preview_summary="$(python3 /usr/local/bin/agendaflow-retention-preview.py 2>/dev/null)" || preview_code=$?
+if [[ "$preview_code" -eq 0 ]]; then
+  echo "Retencao: simulacao aceita. $preview_summary"
+elif [[ "$preview_code" -eq 2 ]]; then
+  echo "Retencao: bloqueio de segurança esperado, sem exclusoes. $preview_summary"
+else
+  echo "Aviso: falha ao consultar inventario S3; nenhuma copia foi excluida." >&2
 fi
