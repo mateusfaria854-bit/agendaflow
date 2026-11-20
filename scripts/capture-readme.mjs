@@ -86,7 +86,7 @@ try {
   await gifFrame(page,'#minhas-reservas');
   await shot(page,'04-minhas-reservas.jpg','#minhas-reservas');
 
-  const admin=await desktop.newPage();
+  // Contexto separado: o ADMIN não herda o cookie do CLIENTE.\n  const adminContext=await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:1,colorScheme:'dark',reducedMotion:'reduce'});\n  const admin=await adminContext.newPage();
   await admin.goto(base+'/#portal',{waitUntil:'networkidle'});
   await expect(admin.getByRole('heading',{name:'Seu espaço começa aqui.'})).toBeVisible();
   const login=admin.locator('.portal-panel .portal-form').first();
@@ -108,6 +108,7 @@ try {
   await expect(mob.locator('.portal-catalog .portal-service-grid').getByRole('heading',{name:'Corte clássico',exact:true})).toBeVisible();
   await shot(mob,'06-mobile.jpg','#visao');
   await mobile.close();
+  await adminContext.close();
   await desktop.close();
   console.log(`Capturas reais geradas: 6 JPGs e ${frame} quadros de GIF.`);
 } finally {
