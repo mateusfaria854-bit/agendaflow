@@ -52,7 +52,7 @@ try {
   await page.goto(base+'/',{waitUntil:'networkidle'});
   await page.evaluate(()=>document.fonts.ready);
   await expect(page.locator('.portal-catalog .portal-service-grid').getByRole('heading',{name:'Corte clássico',exact:true})).toBeVisible();
-  await shot(page,'01-inicio.jpg','#visao');
+  await shot(page,'01-inicio.jpg');
 
   await gifFrame(page,'.portal-grid');
   await shot(page,'02-catalogo.jpg','.portal-grid');
@@ -86,7 +86,9 @@ try {
   await gifFrame(page,'#minhas-reservas');
   await shot(page,'04-minhas-reservas.jpg','#minhas-reservas');
 
-  // Contexto separado: o ADMIN não herda o cookie do CLIENTE.\n  const adminContext=await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:1,colorScheme:'dark',reducedMotion:'reduce'});\n  const admin=await adminContext.newPage();
+  // Contexto separado: o ADMIN não herda o cookie do CLIENTE.
+  const adminContext=await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:1,colorScheme:'dark',reducedMotion:'reduce'});
+  const admin=await adminContext.newPage();
   await admin.goto(base+'/#portal',{waitUntil:'networkidle'});
   await expect(admin.getByRole('heading',{name:'Seu espaço começa aqui.'})).toBeVisible();
   const login=admin.locator('.portal-panel .portal-form').first();
@@ -106,7 +108,7 @@ try {
   await mob.goto(base+'/',{waitUntil:'networkidle'});
   await mob.evaluate(()=>document.fonts.ready);
   await expect(mob.locator('.portal-catalog .portal-service-grid').getByRole('heading',{name:'Corte clássico',exact:true})).toBeVisible();
-  await shot(mob,'06-mobile.jpg','#visao');
+  await shot(mob,'06-mobile.jpg');
   await mobile.close();
   await adminContext.close();
   await desktop.close();
