@@ -64,4 +64,14 @@ if [[ "$uploaded" != "$localSize" ]]; then
   echo "ERRO: tamanho do arquivo S3 difere do arquivo local." >&2
   exit 1
 fi
-echo "Backup confirmado no bucket privado. Arquivo: $key. Bytes: $localSize"
+
+echo "Recuperando o dump diretamente do S3 e verificando o conteudo..."
+DOWNLOADED="$WORKDIR/downloaded.dump"
+aws --endpoint-url "$BACKUP_S3_ENDPOINT" s3 cp "s3://$BACKUP_BUCKET/$key" "$DOWNLOADED" \
+  --only-show-errors --no-progress
+if ! cmp -s "$ARCHIVE" "$DOWNLOADED"; then
+  echo "ERRO: conteudo recuperado do bucket difere do dump restaurado." >&2
+  exit 1
+fi
+pg_restore --list "$DOWNLOADED" >/dev/null
+echo "Backup confirmado no bucket privado e recuperado byte a byte. Arquivo: $key. Bytes: $localSize"
