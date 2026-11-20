@@ -48,9 +48,9 @@ psql -h "$WORKDIR" -p 55432 -U postgres -d agendaflow_restore_test \
   -v ON_ERROR_STOP=1 -Atqc "SELECT 1 FROM schema_migrations LIMIT 1" | grep -qx '1'
 psql -h "$WORKDIR" -p 55432 -U postgres -d agendaflow_restore_test \
   -v ON_ERROR_STOP=1 -Atqc "SELECT 1 FROM pg_constraint WHERE conname = 'appointments_no_overlap'" | grep -qx '1'
-pg_ctl -D "$VERIFY_PG_DIR" -m fast -w stop >/dev/null
-localStarted=0
-echo "Restauracao em banco isolado aprovada."
+# Mantem o servidor descartavel ativo para testar o objeto BAIXADO do S3
+# em outro banco, sem tocar no banco hospedado.
+echo "Primeira restauracao em banco isolado aprovada."
 
 timestamp="$(date -u +'%Y-%m-%dT%H-%M-%SZ')"
 key="agendaflow/demo/daily/${timestamp}-${RAILWAY_DEPLOYMENT_ID:-manual}.dump"
@@ -74,6 +74,30 @@ if ! cmp -s "$ARCHIVE" "$DOWNLOADED"; then
   exit 1
 fi
 pg_restore --list "$DOWNLOADED" >/dev/null
+
+# Recuperacao real do artefato ja armazenado: restaurar em um SEGUNDO banco
+# vazio e temporario. Comparar contagens essenciais dos dois restores,
+# sem imprimir registros de usuarios nem metadados privados.
+echo "Testando restauracao do arquivo recuperado do S3 em segundo banco isolado..."
+createdb -h "$WORKDIR" -p 55432 -U postgres agendaflow_restore_from_s3
+pg_restore -h "$WORKDIR" -p 55432 -U postgres -d agendaflow_restore_from_s3 \
+  --no-owner --no-acl --exit-on-error "$DOWNLOADED" >/dev/null
+
+for table in schema_migrations users services professionals appointments sessions; do
+  orig_count="$(psql -h "$WORKDIR" -p 55432 -U postgres -d agendaflow_restore_test \
+    -X -v ON_ERROR_STOP=1 -Atqc "SELECT count(*) FROM $table")"
+  s3_count="$(psql -h "$WORKDIR" -p 55432 -U postgres -d agendaflow_restore_from_s3 \
+    -X -v ON_ERROR_STOP=1 -Atqc "SELECT count(*) FROM $table")"
+  if [[ "$orig_count" != "$s3_count" ]]; then
+    echo "ERRO: restauracao S3 inconsistente na tabela $table." >&2
+    exit 1
+  fi
+done
+psql -h "$WORKDIR" -p 55432 -U postgres -d agendaflow_restore_from_s3 \
+  -X -v ON_ERROR_STOP=1 -Atqc "SELECT 1 FROM pg_constraint WHERE conname='appointments_no_overlap'" | grep -qx '1'
+pg_ctl -D "$VERIFY_PG_DIR" -m fast -w stop >/dev/null
+localStarted=0
+echo "Restauracao independente do objeto S3 aprovada."
 
 # Atesta o backup somente DEPOIS de um restore em servidor isolado
 # e da recuperacao byte-a-byte do objeto no armazenamento privado.

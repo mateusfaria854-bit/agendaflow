@@ -10,9 +10,11 @@ Além disso, existe a alternativa independente versionada em `ops/backup/`:
 2. Salvar um arquivo custom do `pg_dump` em diretório temporário.
 3. Abrir uma instância local descartável do PostgreSQL dentro do job e executar `pg_restore` completo.
 4. Verificar a tabela de migrações e a restrição contra reservas sobrepostas.
-5. Enviar **somente após passar a restauração** para um bucket privado S3 da Railway, conferir o tamanho remoto, baixar o objeto e validar que todos os bytes correspondem ao dump restaurado.
-6. Atualizar no banco a hora e o SHA256 do dump verificado, **sem incluir chaves de objetos nem segredos**. O endpoint `/api/v1/backups/ready` fornece somente o estado público `fresh` ou `unavailable`.
-7. Apagar todos os arquivos e processos locais, inclusive em caso de falha.
+5. Enviar **somente após passar a restauração** para um bucket privado S3 da Railway, conferir o tamanho remoto, baixar o objeto e validar que todos os bytes correspondem ao dump original.
+6. **Restaurar o arquivo baixado do S3 em um segundo banco PostgreSQL temporário**, comparar a contagem de tabelas essenciais com a primeira restauração e verificar a restrição de conflito de reservas.
+7. Somente após as duas restaurações e a verificação do objeto atualizar no banco a hora e o SHA256 do dump, **sem incluir chaves de objetos nem segredos**. O endpoint `/api/v1/backups/ready` fornece somente o estado público `fresh` ou `unavailable`.
+8. Apagar todos os arquivos e processos locais, inclusive em caso de falha.
+
 
 Não use dados reais de clientes na demonstração. O job exige `DEMO_MODE=true`, não contém senhas no código e não cria URL pública para os arquivos.
 
@@ -23,6 +25,11 @@ A infraestrutura real foi provisionada no projeto `agendaflow-demo`, ambiente `p
 **Validação real:** em 20/11/2026 o job leu o banco PostgreSQL hospedado sem interrompê-lo, criou dump custom, restaurou em servidor temporário, verificou migrações/restrição de conflitos, enviou o arquivo ao bucket e baixou de volta para comparação byte a byte. A integridade foi aprovada duas vezes, sendo a última já com teste de download S3.
 
 **Atualização:** o novo job de backup foi executado contra o PostgreSQL hospedado, restaurou e recuperou o arquivo do bucket, e registrou a última cópia íntegra no banco. O monitor externo do GitHub Actions confirmou `/api/v1/backups/ready` como `fresh`. O endpoint separado `/api/v1/backups/daily` e a [auditoria diária do GitHub Actions](../.github/workflows/backup-daily-audit.yml) conferem a existência de uma cópia validada desde o último horário previsto de 03h20 UTC, com verificação às 08h30 UTC. Essa consulta não modifica o banco, o bucket ou a agenda. O agendamento permanece `20 3 * * *` e **a primeira execução pela agenda diária ainda precisa ser observada**. Backups nativos do volume e retenção dos objetos continuam pendentes.
+
+
+## Verificação reforçada de recuperação (atualização)
+
+O procedimento passou a testar a restauração completa **também do arquivo recuperado do bucket privado**, em um segundo banco descartável, antes de registrar a integridade do backup. Os dois bancos temporários são destruídos ao final. Isso reduz a dependência da simples comparação de bytes e valida que a versão armazenada realmente pode ser restaurada. A validação é independente do banco hospedado e não substitui um exercício operacional completo de recuperação em outro serviço Railway. A implantação da nova imagem e sua primeira execução precisam ser conferidas separadamente.
 
 ## Configuração na Railway
 

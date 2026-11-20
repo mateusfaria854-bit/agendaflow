@@ -23,6 +23,8 @@ jobs:
           grep -Fq 'pg_restore' ops/backup/backup.sh
           grep -Fq 'head-object' ops/backup/backup.sh
           grep -Fq 'INSERT INTO backup_verifications' ops/backup/backup.sh
+          grep -Fq 'agendaflow_restore_from_s3' ops/backup/backup.sh
+          grep -Fq 'Restauracao independente do objeto S3 aprovada' ops/backup/backup.sh
       - name: Testar retenção com inventário fictício, sem acesso S3
         run: |
           python3 -m unittest discover -s ops/backup -p 'test_retention.py' -v
