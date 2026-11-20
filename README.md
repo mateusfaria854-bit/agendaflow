@@ -3,6 +3,7 @@
 [![Qualidade e banco](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/ci.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/ci.yml)
 [![Navegador E2E](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/e2e.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/e2e.yml)
 [![Contêiner de demonstração](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/container-demo.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/container-demo.yml)
+[![Disponibilidade HTTPS](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/demo-uptime.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/demo-uptime.yml)
 
 **Plataforma full-stack de agendamentos** em desenvolvimento, com React, TypeScript, Node.js, Fastify e PostgreSQL. O projeto segue **Spec-Driven Development (SDD)** e prioriza uma arquitetura clara, requisitos verificáveis e prevenção de reservas duplicadas.
 
@@ -158,7 +159,7 @@ docker build -t agendaflow:demo .
 
 A imagem exige `DATABASE_URL` de um PostgreSQL separado e, por segurança, `WEB_ORIGIN=https://seu-dominio` na execução com `NODE_ENV=production`. O banco **não** é incluído na imagem. O comando de migração compilada, sem dependências de desenvolvimento, é `npm run db:migrate:runtime -w @agendaflow/api`. O script `npm run db:demo:bootstrap` combina migrações e seed fictício, e é usado no pre-deploy Railway. Para um banco **descartável de demo**, o seed pode ser aplicado com `npm run db:seed:runtime -w @agendaflow/api`.
 
-Para uma demo aberta, configure `DEMO_MODE=true` no serviço: cadastros aceitam apenas endereços **fictícios @example.invalid**. Isso evita e-mails reais, mas ainda são necessários limites contra abuso, limpeza periódica do banco e monitoramento.
+Para uma demo aberta, configure `DEMO_MODE=true` no serviço: cadastros aceitam apenas endereços **fictícios @example.invalid**, com limite conservador de 5 tentativas de cadastro por IP a cada 15 minutos na instância de API. Essa proteção em memória não substitui limites distribuídos na borda. Isso evita e-mails reais, mas ainda são necessários limites contra abuso, limpeza periódica do banco e monitoramento.
 
 [Guia passo a passo para Railway e outros provedores](docs/DEPLOY_DEMO.md). A demonstração foi implantada e passou na checagem externa HTTPS em 20/11/2026. Evite inserir dados pessoais, senhas reutilizadas ou clientes reais.
 
