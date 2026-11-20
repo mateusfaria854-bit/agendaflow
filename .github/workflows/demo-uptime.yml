@@ -54,6 +54,18 @@ jobs:
             if(body.status!=="ready")process.exit(1);
             console.log("Banco PostgreSQL conectado");
           '
+      - name: Conferir backup PostgreSQL íntegro nas últimas 36 horas
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error --location --retry 2 --retry-delay 5 --connect-timeout 10 --max-time 30 \
+            "$DEMO_BASE_URL/api/v1/backups/ready" -o /tmp/agendaflow-backup-health.json
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const body=JSON.parse(fs.readFileSync("/tmp/agendaflow-backup-health.json","utf8"));
+            if(body.status!=="fresh")process.exit(1);
+            console.log("Backup PostgreSQL verificado dentro da janela de 36h");
+          '
       - name: Conferir frontend React e asset estático
         shell: bash
         run: |
@@ -83,7 +95,7 @@ jobs:
             gh issue create -R "$GITHUB_REPOSITORY" \
               --title "AgendaFlow: demonstracao indisponivel" \
               --label "$label" \
-              --body "A verificacao externa HTTPS, API, frontend ou banco falhou.\n\nExecucao: $run_url\n\nNao incluir dados de clientes neste incidente."
+              --body "A verificacao externa HTTPS, API, frontend, banco ou backup recente falhou.\n\nExecucao: $run_url\n\nNao incluir dados de clientes neste incidente."
           else
             gh issue comment "$issue" -R "$GITHUB_REPOSITORY" \
               --body "Nova falha detectada. Verificar execucao: $run_url"
@@ -100,5 +112,5 @@ jobs:
           if [[ -n "$issue" ]]; then
             run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
             gh issue close "$issue" -R "$GITHUB_REPOSITORY" \
-              --comment "Recuperacao confirmada pelos testes externos de HTTPS, frontend, API e PostgreSQL. $run_url"
+              --comment "Recuperacao confirmada por HTTPS, frontend, API, PostgreSQL e backup recente. $run_url"
           fi
