@@ -73,6 +73,16 @@ test('Área profissional: vínculo seguro, isolamento da agenda e privacidade',{
       login(email1),login(email2),login('staff-unlinked-'+unlinked+'@example.invalid'),
       login('client-staff-'+client+'@example.invalid'),login('admin-staff-'+admin+'@example.invalid'),
     ]);
+    const adminProfessionals=await app.inject({
+      url:'/api/v1/admin/professionals',headers:{cookie:adminCookie},
+    });
+    assert.equal(adminProfessionals.statusCode,200,adminProfessionals.body);
+    const adminRecord=adminProfessionals.json().professionals.find((p:{id:string})=>p.id===pro1);
+    assert.equal(adminRecord.hasAccount,true);
+    const publicProfessionals=await app.inject({url:'/api/v1/professionals'});
+    assert.equal(publicProfessionals.statusCode,200,publicProfessionals.body);
+    const publicRecord=publicProfessionals.json().professionals.find((p:{id:string})=>p.id===pro1);
+    assert.ok(!Object.hasOwn(publicRecord,'hasAccount'),'catálogo público não revela status de conta');
     const path='/api/v1/staff/appointments?from='+date+'&to='+date;
     assert.equal((await app.inject({url:'/api/v1/staff/me'})).statusCode,401);
     assert.equal((await app.inject({url:path})).statusCode,401);

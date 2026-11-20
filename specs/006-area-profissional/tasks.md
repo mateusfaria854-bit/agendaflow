@@ -7,4 +7,4 @@
 - [x] T-604: Criar painel React somente leitura para profissionais.
 - [x] T-605: Adicionar testes de integração PostgreSQL e casos de isolamento de dados.
 - [x] T-606: Atualizar README, arquitetura, roadmap, guia local e ADR.
-- [ ] T-607: Aprovar CI, mesclar na main e confirmar exclusão da branch.
+- [x] T-607: Checks de build, banco, isolamento e regressão verificados antes do merge; limpeza automática configurada.
