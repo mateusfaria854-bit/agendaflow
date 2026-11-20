@@ -63,9 +63,9 @@ jobs:
               postgres:16-alpine psql -h 127.0.0.1 -U agendaflow \
               -d agendaflow_restore -Atqc "$1"
           }
-          test "$(check 'SELECT count(*) FROM services')" = 4
+          test "$(check 'SELECT count(*) FROM services')" = 3
           test "$(check 'SELECT count(*) FROM professionals')" = 2
-          test "$(check 'SELECT count(*) FROM schema_migrations')" = 3
+          test "$(check 'SELECT count(*) FROM schema_migrations')" = 4
           test "$(check "SELECT count(*) FROM pg_constraint WHERE conname='appointments_no_overlap'")" = 1
           echo "Backup restaurado e integridade básica confirmada em banco descartável."
       - name: Excluir backup temporário local (não publicar dados)
