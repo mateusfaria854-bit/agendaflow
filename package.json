@@ -23,7 +23,8 @@
     "admin:create": "npm run admin:create -w @agendaflow/api",
     "staff:provision": "npm run staff:provision -w @agendaflow/api",
     "check": "npm run spec:check && npm run arch:check && npm run build && npm test",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "db:demo:bootstrap": "npm run db:migrate:runtime -w @agendaflow/api && npm run db:seed:runtime -w @agendaflow/api"
   },
   "license": "UNLICENSED",
   "devDependencies": {
