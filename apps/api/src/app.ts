@@ -3,7 +3,7 @@ import fastifyStatic from '@fastify/static';
 import { fileURLToPath } from 'node:url';
 import { APP_NAME, type HealthResponse, type ReadyResponse } from '@agendaflow/shared';
 import { checkDatabase } from './db/client.js';
-import {checkBackupFreshness, type BackupFreshness} from './db/backup-health.js';
+import {checkBackupFreshness, checkDailyBackup, type BackupFreshness} from './db/backup-health.js';
 import { authRoutes } from './modules/auth/routes.js';
 import { checkWriteOrigin } from './modules/auth/session.js';
 import { catalogRoutes } from './modules/catalog/routes.js';
@@ -12,7 +12,7 @@ import {appointmentRoutes} from './modules/appointments/routes.js';
 import {adminAppointmentRoutes} from './modules/admin/routes.js';
 import {staffRoutes} from './modules/staff/routes.js';
 
-type Options = { databaseCheck?: () => Promise<boolean>; backupCheck?: () => Promise<BackupFreshness>; logger?: boolean; serveWeb?: boolean; webRoot?: string };
+type Options = { databaseCheck?: () => Promise<boolean>; backupCheck?: () => Promise<BackupFreshness>; dailyBackupCheck?: () => Promise<boolean>; logger?: boolean; serveWeb?: boolean; webRoot?: string };
 
 /** Factory: a API pode ser testada sem abrir porta HTTP externa. */
 export function createApp(options: Options = {}) {
@@ -23,6 +23,7 @@ export function createApp(options: Options = {}) {
   });
   const databaseCheck = options.databaseCheck ?? checkDatabase;
   const backupCheck = options.backupCheck ?? checkBackupFreshness;
+  const dailyBackupCheck = options.dailyBackupCheck ?? checkDailyBackup;
   // Uma instância produtiva não deve emitir cookies de sessão sem HTTPS.
   if (process.env.NODE_ENV === 'production') {
     const origin = process.env.WEB_ORIGIN;
@@ -68,6 +69,18 @@ export function createApp(options: Options = {}) {
     const status = await backupCheck();
     return status === 'fresh'
       ? {status:'fresh'}
+      : reply.code(503).send({status:'unavailable'});
+  });
+
+  // Checagem diária da janela do cron (03:20 UTC). Sem expor horários ou dados S3.
+  // Uma cópia manual íntegra depois do horário previsto também satisfaz a meta.
+  app.get('/api/v1/backups/daily', async (_request, reply) => {
+    if (process.env.DEMO_MODE !== 'true') {
+      return reply.code(404).send({error:'Rota não encontrada.'});
+    }
+    const verified = await dailyBackupCheck();
+    return verified
+      ? {status:'verified'}
       : reply.code(503).send({status:'unavailable'});
   });
 
