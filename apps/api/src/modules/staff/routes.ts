@@ -56,7 +56,7 @@ export const staffRoutes:FastifyPluginAsync=async app=>{
     if(!professional)return reply.code(404).send({error:'Não há uma agenda profissional ativa vinculada à sua conta.'});
     const zone=businessTimeZone();
     // O profissional é derivado SOMENTE da sessão, nunca de parâmetros da consulta.
-    const args=[professional.id,from,to,zone,status??null] as const;
+    const args=[professional.id,from,to,zone,status??null];
     const where=[
       ' WHERE a.professional_id=$1',
       ' AND a.starts_at>=($2::date::timestamp AT TIME ZONE $4)',
