@@ -57,7 +57,7 @@ test('Fase 4: calendário, filtros, segurança, reserva manual e transições de
       return cookie(result);
     }
     const [admin,client,staff]=await Promise.all([login(adminId),login(clientId),login(staffId)]);
-    const path=`/api/v1/admin/appointments?from=${date}&to=${date}`;
+    const path=`/api/v1/admin/appointments?from=${date}&to=${date}&professionalId=${proId}`;
     const anonymous=await app.inject({method:'GET',url:path});
     assert.equal(anonymous.statusCode,401);
     assert.equal((await app.inject({method:'GET',url:path,headers:{cookie:client}})).statusCode,403);
