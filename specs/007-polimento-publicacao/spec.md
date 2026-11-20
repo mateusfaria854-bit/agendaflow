@@ -15,7 +15,7 @@ Validar a jornada real no navegador, reduzir riscos de segurança, preparar impl
 - RF-509: README apresenta funcionalidades demonstráveis, como testar localmente, limitações, critérios de prontidão e link para o pipeline.
 - RF-510: Não divulgar credenciais de produção, URL de banco, dados pessoais reais ou links de deploy inexistentes.
 
-## Aceitação
+## Critérios de aceitação
 - `npm run check` passa e não há regressões da API.
 - Workflow `e2e.yml` instala Chromium e executa Playwright sobre servidores locais e PostgreSQL descartável.
 - Cadastro, agendamento e cancelamento geram resultado visível no navegador, inclusive viewport de celular.
