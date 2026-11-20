@@ -80,16 +80,29 @@ jobs:
             -i /tmp/agendaflow-palette.png -filter_complex \
             '[0:v]fps=8,scale=1000:-1:flags=lanczos[v];[v][1:v]paletteuse=dither=bayer:bayer_scale=3' \
             -loop 0 docs/media/fluxo-agendamento.gif
-          ls -lh docs/media/*.png docs/media/*.gif
+          ls -lh docs/media/*.jpg docs/media/*.gif
       - name: Guardar capturas reais para publicação no repositório
         uses: actions/upload-artifact@v4
         with:
           name: capturas-reais-readme
           path: |
-            docs/media/*.png
+            docs/media/*.jpg
             docs/media/*.gif
           retention-days: 7
           if-no-files-found: error
+      - name: Preparar imagens capturadas para publicação via API GitHub
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64
+          from pathlib import Path
+          for path in sorted(Path('docs/media').glob('*.jpg')) + sorted(Path('docs/media').glob('*.gif')):
+              print('ASSET_BEGIN ' + str(path), flush=True)
+              payload = base64.b64encode(path.read_bytes()).decode('ascii')
+              for offset in range(0, len(payload), 1500):
+                  print('ASSET_DATA ' + payload[offset:offset+1500], flush=True)
+              print('ASSET_END ' + str(path), flush=True)
+          PY
       - name: Logs para investigar falhas
         if: failure()
         run: |
