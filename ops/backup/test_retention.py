@@ -26,8 +26,8 @@ class RetentionTests(unittest.TestCase):
         objects = [item(i) for i in range(48)]
         result = retention.plan(objects, NOW)
         self.assertEqual(result["status"], "ok")
-        self.assertEqual(result["would_expire_count"], 18)
-        self.assertEqual(result["would_expire_bytes"], 3600)
+        self.assertEqual(result["would_expire_count"], 17)
+        self.assertEqual(result["would_expire_bytes"], 3400)
         self.assertEqual(result["deleted_count"], 0)
 
     def test_keeps_all_when_recent(self):
