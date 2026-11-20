@@ -1,0 +1,15 @@
+name: Capturas do README
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/capture-readme.mjs
+      - .github/workflows/readme-media.yml
+permissions:
+  contents: read
+jobs:
+  teste:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "capturas"
