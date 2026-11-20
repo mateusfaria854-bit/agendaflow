@@ -8,4 +8,4 @@
 - [x] T-505: Implementar transições de status com validação e auditoria.
 - [x] T-506: Integrar painel de calendário, filtros e formulários no React.
 - [x] T-507: Criar testes de integração e atualizar documentação/README.
-- [ ] T-508: Verificar checks do PR, mesclar na main e confirmar limpeza automática da branch.
+- [x] T-508: Checks de push e PR aprovados, squash merge realizado e branch excluída automaticamente.
