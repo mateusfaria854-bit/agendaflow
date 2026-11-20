@@ -1,4 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import {api} from '../../lib/api.js';
+import AvailabilityPanel from '../availability/AvailabilityPanel.js';
+import AvailabilityAdmin from '../availability/AvailabilityAdmin.js';
 import './portal.css';
 
 type Role = 'CLIENTE' | 'PROFISSIONAL' | 'ADMIN';
@@ -7,20 +10,6 @@ type Service = {id:string;name:string;durationMinutes:number;priceCents:number;a
 type ProService = {id:string;name:string;active:boolean};
 type Professional = {id:string;name:string;active:boolean;services:ProService[]};
 type AuthMode = 'login' | 'register';
-
-async function api<T>(path:string, options:RequestInit={}):Promise<T> {
-  const response=await fetch(`/api/v1${path}`,{
-    credentials:'same-origin',
-    headers:{'Content-Type':'application/json'},
-    ...options,
-  });
-  const data:unknown=await response.json().catch(()=>null);
-  if (!response.ok) {
-    const detail=typeof data==='object'&&data!==null&&'error' in data?String(data.error):'Não foi possível concluir a operação.';
-    throw new Error(detail);
-  }
-  return data as T;
-}
 
 const money=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
 function price(cents:number){return money.format(cents/100)}
@@ -212,6 +201,8 @@ export default function Portal(){
         </div>
       </div>
 
+      <AvailabilityPanel services={services} professionals={professionals}/>
+
       {user?.role==='ADMIN'&&<div className="portal-admin">
         <div className="section-heading"><div><span className="section-tag">/ ADMINISTRAÇÃO</span><h2>Gestão do catálogo.</h2></div><p>Alterações são validadas na API. Registros podem ser desativados sem perder o histórico.</p></div>
         <div className="portal-grid">
@@ -246,6 +237,7 @@ export default function Portal(){
             </div>)}</div>
           </div>
         </div>
+        <AvailabilityAdmin professionals={adminPros}/>
       </div>}
     </div>
   </section>;
