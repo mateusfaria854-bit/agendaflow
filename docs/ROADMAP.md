@@ -20,4 +20,4 @@ Dados de demonstração são sempre sintéticos. O sistema não realiza pagament
 ## Contribuição
 Novas funcionalidades devem ter especificação, plano e tarefas antes do código. Mudanças de escopo precisam atualizar os testes e a documentação relacionada.
 
-**Fase 1:** implementada e submetida aos testes de integração. **Próxima etapa:** Fase 2, disponibilidade e bloqueios de horários. Os fluxos de reservas seguem fora do escopo até Fase 3.
+**Fase 1:** implementada. **Fase 2:** expediente semanal, pausas, bloqueios e cálculo de horários disponíveis. **Próxima etapa:** Fase 3, criar, listar e cancelar reservas reais com revalidação transacional.

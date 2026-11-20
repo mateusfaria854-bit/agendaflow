@@ -4,7 +4,7 @@
 
 **Plataforma full-stack de agendamentos** em desenvolvimento, com React, TypeScript, Node.js, Fastify e PostgreSQL. O projeto segue **Spec-Driven Development (SDD)** e prioriza uma arquitetura clara, requisitos verificáveis e prevenção de reservas duplicadas.
 
-> **Estado atual: Fase 1, identidade e catálogo.** Cadastro/login, sessões e CRUD administrativo de serviços e profissionais estão conectados ao PostgreSQL. O calendário ainda é ilustrativo; agendamentos reais serão entregues na Fase 3.
+> **Estado atual: Fase 2, disponibilidade.** Além de cadastro/login e catálogo com PostgreSQL, a API calcula horários livres por jornada, duração, bloqueios e reservas ativas. A tela permite consultar horários e administrar expedientes, mas **a criação de reservas reais ainda não está disponível** (Fase 3).
 
 ## Objetivo
 
@@ -33,6 +33,7 @@ specs/
   000-fundacao/         Requisitos, plano e tarefas da Fase 0
   001-autenticacao/     Autenticação e perfis
   002-catalogo/        Gestão de serviços e profissionais
+  003-disponibilidade/ Horários, jornada e bloqueios
   _templates/           Modelos de spec, plan e tasks
 docs/
   ARQUITETURA.md        Limites e fluxo entre camadas
@@ -78,6 +79,7 @@ Instruções detalhadas: [Guia local](docs/GUIA_LOCAL.md).
 - **Permissões:** endpoints de escrita do catálogo exigem administrador; cadastro público nunca cria admin.
 - **Catálogo:** listagem pública de serviços e profissionais ativos.
 - **Painel administrativo:** criação, edição, desativação e vínculo de profissionais a serviços.
+- **Disponibilidade (Fase 2):** expediente semanal com pausas, bloqueios excepcionais e consulta pública de horários livres, respeitando reservas ativas e duração do serviço.
 
 O primeiro administrador é criado pelo comando local `npm run admin:create`, sem credenciais de demonstração publicadas. Consulte o [Guia local](docs/GUIA_LOCAL.md) para configurar as variáveis temporárias e usar o painel. **O sistema ainda não possui reservas reais.**
 
@@ -92,6 +94,10 @@ O primeiro administrador é criado pelo comando local `npm run admin:create`, se
 | GET | `/api/v1/services`, `/api/v1/professionals` | Público |
 | GET | `/api/v1/admin/services`, `/api/v1/admin/professionals` | Admin |
 | POST/PATCH | `/api/v1/services`, `/api/v1/professionals` | Admin |
+| GET | `/api/v1/availability/slots` | Público, horários disponíveis |
+| GET | `/api/v1/admin/availability` | Admin, expediente/bloqueios |
+| PUT | `/api/v1/admin/professionals/:id/availability` | Admin, definir expediente |
+| POST/DELETE | `/api/v1/admin/blocked-periods[/id]` | Admin, bloquear e liberar períodos |
 
 ## Testes e verificações
 
@@ -108,7 +114,7 @@ A CI executa build, testes, verificações arquiteturais, migrações e testes r
 
 Cada funcionalidade tem três documentos versionados em `specs/NNN-nome/`: `spec.md` (requisitos e aceite), `plan.md` (arquitetura e dados), e `tasks.md` (execução e testes). O conjunto de princípios está em [specs/constitution.md](specs/constitution.md).
 
-Especificações implementadas: [Fundação](specs/000-fundacao/spec.md), [Autenticação](specs/001-autenticacao/spec.md) e [Catálogo](specs/002-catalogo/spec.md). O próximo foco será disponibilidade e bloqueios de horários.
+Especificações implementadas: [Fundação](specs/000-fundacao/spec.md), [Autenticação](specs/001-autenticacao/spec.md), [Catálogo](specs/002-catalogo/spec.md) e [Disponibilidade](specs/003-disponibilidade/spec.md). A próxima etapa é reservar, listar e cancelar agendamentos reais.
 
 ## Próximas fases
 
@@ -116,7 +122,7 @@ Confira o [Roadmap](docs/ROADMAP.md) e as [Issues planejadas](https://github.com
 
 ## Segurança e escopo
 
-O frontend não acessa o banco diretamente. A API já verifica autenticação, permissões administrativas e validações do catálogo; reservas continuam fora do escopo. O PostgreSQL já possui a restrição para impedir sobreposição de reservas `PENDENTE` e `CONFIRMADO`; o restante das regras de negócio ainda será implementado.
+O frontend não acessa o banco diretamente. A API já verifica autenticação, permissões administrativas e validações do catálogo; a criação de reservas reais continua fora do escopo. O PostgreSQL já possui a restrição para impedir sobreposição de reservas `PENDENTE` e `CONFIRMADO`; o restante das regras de negócio ainda será implementado.
 
 Não são utilizadas credenciais de produção ou dados reais. Os valores em `compose.yaml` são apenas para desenvolvimento local.
 
