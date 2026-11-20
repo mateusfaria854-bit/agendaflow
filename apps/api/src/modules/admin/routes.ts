@@ -36,7 +36,7 @@ const manualSchema={
     clientId:{type:'string',pattern:UUID},
     serviceId:{type:'string',pattern:UUID},
     professionalId:{type:'string',pattern:UUID},
-    startsAt:{type:'string',maxLength:30,pattern:'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$'},
+    startsAt:{type:'string',minLength:20,maxLength:30},
   },
 };
 const idSchema={type:'object',required:['id'],additionalProperties:false,
