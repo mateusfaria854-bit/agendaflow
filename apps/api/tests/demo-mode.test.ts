@@ -33,7 +33,7 @@ test('modo demo limita tentativas de cadastro por IP sem escrever no banco',asyn
     for(let index=0;index<5;index++){
       const response=await app.inject(opts);
       assert.equal(response.statusCode,400);
-      assert.match(response.json().error,/example\\.invalid/);
+      assert.match(response.json().error,/example\.invalid/);
     }
     const rejected=await app.inject(opts);
     assert.equal(rejected.statusCode,429);
