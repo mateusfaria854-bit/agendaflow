@@ -115,7 +115,7 @@ Instruções detalhadas: [Guia local](docs/GUIA_LOCAL.md).
 - **Cadastro e login:** clientes criam conta; senhas usam scrypt e salt aleatório.
 - **Sessões:** cookies HttpOnly/SameSite, hashes dos tokens no PostgreSQL, logout e expiração.
 - **Permissões:** endpoints de escrita do catálogo exigem administrador; cadastro público nunca cria admin.
-- **Segurança HTTP:** respostas da API usam no-store, nosniff, Referrer-Policy e proteção contra iframe; em produção WEB_ORIGIN deve ser HTTPS.
+- **Segurança HTTP:** respostas da API usam no-store, nosniff, Referrer-Policy, Permissions-Policy e proteção contra iframe; em produção WEB_ORIGIN deve ser HTTPS, com HSTS sem preload.
 - **Catálogo:** listagem pública de serviços e profissionais ativos.
 - **Painel administrativo:** criação, edição, desativação e vínculo de profissionais a serviços.
 - **Disponibilidade (Fase 2):** expediente semanal com pausas, bloqueios excepcionais e consulta pública de horários livres, respeitando reservas ativas e duração do serviço.
