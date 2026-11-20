@@ -72,21 +72,19 @@ export async function createBooking(clientId:string, input:NewBooking, actorId:s
       await dbClient.query('ROLLBACK');
       return {status:404,error:'Este serviço não é oferecido pelo profissional.'};
     }
-    const [weekly,blocks,bookings]=await Promise.all([
-      dbClient.query<{weekday:number;startTime:string;endTime:string}>(
+    const weekly=await dbClient.query<{weekday:number;startTime:string;endTime:string}>(
         `SELECT weekday,to_char(start_time,'HH24:MI') AS "startTime",
          to_char(end_time,'HH24:MI') AS "endTime"
-         FROM availabilities WHERE professional_id=$1 ORDER BY weekday,start_time`,[professionalId]),
-      dbClient.query<{startsAt:Date;endsAt:Date}>(
+         FROM availabilities WHERE professional_id=$1 ORDER BY weekday,start_time`,[professionalId]);
+    const blocks=await dbClient.query<{startsAt:Date;endsAt:Date}>(
         `SELECT starts_at AS "startsAt", ends_at AS "endsAt" FROM blocked_periods
          WHERE professional_id=$1 AND ends_at >= ($2::date - interval '2 days')
-         AND starts_at < ($2::date + interval '3 days')`,[professionalId,date]),
-      dbClient.query<{startsAt:Date;endsAt:Date}>(
+         AND starts_at < ($2::date + interval '3 days')`,[professionalId,date]);
+    const bookings=await dbClient.query<{startsAt:Date;endsAt:Date}>(
         `SELECT starts_at AS "startsAt", ends_at AS "endsAt" FROM appointments
          WHERE professional_id=$1 AND status IN ('PENDENTE','CONFIRMADO')
          AND ends_at >= ($2::date - interval '2 days')
-         AND starts_at < ($2::date + interval '3 days')`,[professionalId,date]),
-    ]);
+         AND starts_at < ($2::date + interval '3 days')`,[professionalId,date]);
     const iso=(rows:Array<{startsAt:Date;endsAt:Date}>)=>rows.map(v=>({
       startsAt:v.startsAt.toISOString(),endsAt:v.endsAt.toISOString(),
     }));
