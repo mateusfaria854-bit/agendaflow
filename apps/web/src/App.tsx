@@ -17,8 +17,8 @@ const roadmap = [
   { phase: '01', name: 'Identidade e catálogo', summary: 'Cadastro, login, serviços e profissionais conectados à API.', current: false },
   { phase: '02', name: 'Agenda disponível', summary: 'Expedientes, bloqueios e horários válidos calculados pela API.', current: false },
   { phase: '03', name: 'Reserva ponta a ponta', summary: 'Agendar, listar e cancelar sem dupla reserva.', current: false },
-  { phase: '04', name: 'Operação administrativa', summary: 'Calendário, filtros, reserva manual e gestão de status.', current: true },
-  { phase: '05', name: 'Qualidade e publicação', summary: 'Acessibilidade, testes E2E e deploy.', current: false },
+  { phase: '04', name: 'Operação administrativa', summary: 'Calendário, filtros, reserva manual e gestão de status.', current: false },
+  { phase: '05', name: 'Qualidade e publicação', summary: 'Testes no navegador, segurança e preparação para deploy.', current: true },
 ];
 
 function App() {
@@ -37,6 +37,7 @@ function App() {
 
   return (
     <div className="app">
+      <a className="skip-link" href="#inicio">Pular para o conteúdo principal</a>
       <div className="top-glow" aria-hidden="true" />
       <header className="site-header">
         <a className="brand" href="#inicio" aria-label="AgendaFlow, início">
@@ -54,10 +55,10 @@ function App() {
           target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
       </header>
 
-      <main id="inicio">
+      <main id="inicio" tabIndex={-1}>
         <section className="hero section-wrap" id="visao">
           <div className="hero-copy">
-            <div className="eyebrow"><span className="pulse" /> EM DESENVOLVIMENTO <span className="eyebrow-separator">/</span> FASE 04</div>
+            <div className="eyebrow"><span className="pulse" /> EM DESENVOLVIMENTO <span className="eyebrow-separator">/</span> FASE 05</div>
             <h1>O próximo horário.<br/><em>Uma experiência melhor.</em></h1>
             <p>Uma plataforma de agendamentos planejada para simplificar a rotina de clientes e equipes. Construída por etapas, com arquitetura clara e validações no servidor.</p>
             <div className="hero-actions">

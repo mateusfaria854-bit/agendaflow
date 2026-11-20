@@ -1,9 +1,14 @@
-/** HTTP na mesma origem do frontend; o proxy Vite encaminha /api ao servidor. */
+/** HTTP na mesma origem; Content-Type só é enviado quando há corpo JSON. */
 export async function api<T>(path:string, options:RequestInit={}):Promise<T> {
+  const headers=new Headers(options.headers);
+  // Fastify rejeita application/json sem corpo em POST/PATCH/DELETE.
+  if(options.body!==undefined&&options.body!==null&&!headers.has('Content-Type')){
+    headers.set('Content-Type','application/json');
+  }
   const response=await fetch(`/api/v1${path}`,{
-    credentials:'same-origin',
-    headers:{'Content-Type':'application/json'},
     ...options,
+    credentials:'same-origin',
+    headers,
   });
   const data:unknown=await response.json().catch(()=>null);
   if(!response.ok){

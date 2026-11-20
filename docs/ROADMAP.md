@@ -9,7 +9,7 @@ Projeto incremental para um único negócio de serviços. O cronograma é defini
 | 2 | Disponibilidade | Jornada, pausas, bloqueios e slots válidos calculados no servidor |
 | 3 | Reservas | Criar, listar, cancelar e impedir conflitos simultâneos no banco |
 | 4 | Operação administrativa | Calendário, reservas manuais, gestão de status e agenda pessoal de profissionais vinculados |
-| 5 | Polimento e publicação | Acessibilidade, E2E, observabilidade e deploy demonstrativo |
+| 5 | Qualidade e publicação | E2E desktop/mobile, acessibilidade, segurança HTTP e preparação de deploy; implantação externa ainda pendente |
 | Pós-MVP | Reagendamento, relatórios e notificações | Critérios de aceite próprios após MVP validado |
 
 O PDF de planejamento foi organizado em 17 páginas, com jornadas, dados, endpoints indicativos e regras de negócio. A implementação segue as especificações versionadas em `specs/`.
@@ -20,4 +20,4 @@ Dados de demonstração são sempre sintéticos. O sistema não realiza pagament
 ## Contribuição
 Novas funcionalidades devem ter especificação, plano e tarefas antes do código. Mudanças de escopo precisam atualizar os testes e a documentação relacionada.
 
-**Fase 1:** implementada. **Fase 2:** expediente semanal, pausas, bloqueios e cálculo de horários disponíveis. **Fase 3:** criação, consulta e cancelamento de reservas reais, com revalidação transacional e concorrência protegida. **Fase 4:** calendário administrativo, reservas manuais, pesquisa de clientes, transições auditadas e painel privado do profissional. **Próxima etapa:** Fase 5, revisão de segurança/acessibilidade, testes E2E e deploy demonstrativo.
+**Fase 1:** implementada. **Fase 2:** expediente semanal, pausas, bloqueios e cálculo de horários disponíveis. **Fase 3:** criação, consulta e cancelamento de reservas reais, com revalidação transacional e concorrência protegida. **Fase 4:** calendário administrativo, reservas manuais, pesquisa de clientes, transições auditadas e painel privado do profissional. **Fase 5 em andamento:** testes de navegador desktop/mobile, acessibilidade e segurança HTTP; preparação de deploy/backup/rollback documentada. **Pendente:** hospedagem externa, revisão operacional/monitoramento e validação em ambiente público.

@@ -154,8 +154,8 @@ export default function Portal(){
   return <section className="portal-section" id="portal">
     <div className="section-wrap">
       <div className="section-heading">
-        <div><span className="section-tag">/ FASE 01 · IMPLEMENTADO</span><h2>Contas e catálogo conectados.</h2></div>
-        <p>Cadastro e login reais, serviços e profissionais em PostgreSQL. A seleção de horários e as reservas entram nas próximas etapas.</p>
+        <div><span className="section-tag">/ PLATAFORMA OPERACIONAL</span><h2>Contas e catálogo conectados.</h2></div>
+        <p>Cadastro e login reais, serviços e profissionais em PostgreSQL. Consulte horários, confirme reservas e acompanhe atendimentos em tempo real no ambiente local.</p>
       </div>
       {notice&&<div className={`portal-notice ${notice.kind}`} role="status">{notice.text}</div>}
       <div className="portal-grid">
