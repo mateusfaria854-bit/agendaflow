@@ -190,6 +190,10 @@ Para uma demo aberta, configure `DEMO_MODE=true` no serviço: cadastros aceitam 
 
 [Guia passo a passo para Railway e outros provedores](docs/DEPLOY_DEMO.md). A demonstração foi implantada e passou na checagem externa HTTPS em 20/11/2026. Evite inserir dados pessoais, senhas reutilizadas ou clientes reais.
 
+### Monitoramento e incidentes
+
+O workflow [Disponibilidade da demo HTTPS](.github/workflows/demo-uptime.yml) verifica DNS, TLS, frontend, API e PostgreSQL a cada 6 horas. Se um teste falhar, ele **abre ou atualiza uma issue** com o rótulo `agenda-demo-uptime`; após a recuperação, encerra o incidente automaticamente. Esses alertas são registrados no GitHub, e não equivalem a uma plataforma 24/7 com notificações garantidas. Ver [guia operacional](docs/OPERACAO_DEMO.md).
+
 ### Retenção e limpeza segura da demonstração
 
 O AgendaFlow agora possui um comando de manutenção com **simulação por padrão**, testes PostgreSQL e bloqueio explícito contra uso fora do modo demo. Só considera clientes fictícios com idade e última atividade superiores a 30 dias, sem horários recentes/futuros, e exclui suas dependências em transação. **A exclusão automática continua desativada**. O backup lógico independente do Postgres da Railway foi criado, restaurado em PostgreSQL temporário e recuperado do bucket com verificação byte a byte; falta fechar política de retenção/alertas antes de agendar o expurgo.
