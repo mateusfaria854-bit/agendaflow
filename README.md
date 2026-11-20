@@ -156,7 +156,7 @@ O projeto agora fornece um **Dockerfile único**. O build inclui o React compila
 docker build -t agendaflow:demo .
 ```
 
-A imagem exige `DATABASE_URL` de um PostgreSQL separado e, por segurança, `WEB_ORIGIN=https://seu-dominio` na execução com `NODE_ENV=production`. O banco **não** é incluído na imagem. O comando de migração compilada, sem dependências de desenvolvimento, é `npm run db:migrate:runtime -w @agendaflow/api`, executado no ambiente do serviço antes de iniciar a aplicação. Para um banco **descartável de demo**, o seed pode ser aplicado com `npm run db:seed:runtime -w @agendaflow/api`.
+A imagem exige `DATABASE_URL` de um PostgreSQL separado e, por segurança, `WEB_ORIGIN=https://seu-dominio` na execução com `NODE_ENV=production`. O banco **não** é incluído na imagem. O comando de migração compilada, sem dependências de desenvolvimento, é `npm run db:migrate:runtime -w @agendaflow/api`. O script `npm run db:demo:bootstrap` combina migrações e seed fictício, e é usado no pre-deploy Railway. Para um banco **descartável de demo**, o seed pode ser aplicado com `npm run db:seed:runtime -w @agendaflow/api`.
 
 Para uma demo aberta, configure `DEMO_MODE=true` no serviço: cadastros aceitam apenas endereços **fictícios @example.invalid**. Isso evita e-mails reais, mas ainda são necessários limites contra abuso, limpeza periódica do banco e monitoramento.
 
@@ -164,7 +164,7 @@ Para uma demo aberta, configure `DEMO_MODE=true` no serviço: cadastros aceitam 
 
 ### Publicação demonstrativa
 
-A publicação externa ainda **não foi realizada**. O documento [Implantação demonstrativa](docs/DEPLOY_DEMO.md) explica hospedagem HTTPS sob uma origem única, variáveis de ambiente, verificações de saúde, backup PostgreSQL, restauração e rollback. Nenhuma URL de demonstração é anunciada sem estar ativa e verificada. Pagamentos, notificações, recuperação de senha e medidas completas de segurança operacional continuam fora do MVP.
+Uma instância de demonstração foi **implantada na Railway em 20/11/2026** (`agendaflow-demo`, ambiente `production`): serviço web React/Fastify, PostgreSQL privado com volume, migrações e seed fictício executados pelo comando `npm run db:demo:bootstrap`, e healthcheck `/api/v1/ready` aprovado pela Railway. O domínio HTTPS gerenciado foi provisionado, porém a verificação externa independente do acesso público ainda está pendente; por isso, o endereço não é divulgado aqui como demo validada. A implantação segue `main` e usa `DEMO_MODE=true` para restringir cadastro a `@example.invalid`. O documento [Implantação demonstrativa](docs/DEPLOY_DEMO.md) cobre operação, backup e rollback. **Não usar dados reais:** faltam medidas completas contra abuso, monitoramento externo, política de retenção/expurgo, backup testado e revisão LGPD. Pagamentos, notificações e recuperação de senha não fazem parte do MVP.
 
 ## Testes e verificações
 
