@@ -1,0 +1,28 @@
+.staff-schedule{margin-top:35px;border:1px solid #31515d;background:#0f242d;padding:32px;border-radius:17px}
+.staff-heading{display:flex;align-items:end;justify-content:space-between;gap:25px;margin-bottom:28px}
+.staff-heading h3{font:800 clamp(22px,2.8vw,30px) Manrope,sans-serif;letter-spacing:-.8px;color:#f2fffb;margin:13px 0 0}
+.staff-heading p{max-width:350px;font:400 12px/1.7 'DM Sans',sans-serif;color:#96b6bc;margin:0}
+.staff-filters{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:13px;align-items:end}
+.staff-filters label{font-size:12px;color:#bad9d8;font-weight:600;display:flex;flex-direction:column;gap:8px}
+.staff-filters input,.staff-filters select{background:#081d26;border:1px solid #3a606a;border-radius:9px;color:#e4f7f5;color-scheme:dark;padding:10px 13px;min-width:0;min-height:45px;font:500 12px 'DM Sans',sans-serif}
+.staff-filters button,.staff-pagination button{background:#5fe0c8;color:#062b2b;border:0;border-radius:9px;padding:11px 18px;min-height:45px;font:800 12px 'DM Sans',sans-serif;cursor:pointer}
+.staff-filters button:disabled,.staff-pagination button:disabled{opacity:.55;cursor:not-allowed}
+.staff-error{margin:20px 0 0;background:#442b33;color:#ffbfc7;padding:14px;border-radius:9px;font-size:12px}
+.staff-meta{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:26px 0 14px}
+.staff-meta strong{font:800 14px Manrope;color:#dbf6e8}
+.staff-meta span,.staff-caption{font:400 11px/1.7 'DM Sans',sans-serif;color:#8aaab0}
+.staff-list{display:flex;flex-direction:column;gap:10px}
+.staff-appointment{display:grid;grid-template-columns:minmax(155px,1fr) minmax(230px,1.7fr) auto;gap:18px;align-items:center;padding:18px 20px;background:#091d27;border:1px solid #2d4f57;border-radius:11px}
+.staff-appointment-date strong{display:block;font:700 12px/1.5 Manrope;color:#e0fbf1}
+.staff-appointment-date small{display:block;margin-top:7px;color:#90b0b6;font-size:11px}
+.staff-appointment h4{font:800 14px Manrope;color:#e1f7f3;margin:0 0 7px}
+.staff-appointment p{font-size:12px;color:#9ab8bd;margin:0}
+.staff-status{font:700 10px 'DM Sans',sans-serif;color:#abefd9;background:#153b33;border:1px solid #3b7a68;border-radius:7px;padding:7px 10px}
+.staff-status-cancelado{color:#e5b4bf;background:#3a252e;border-color:#744c59}
+.staff-status-concluido{color:#b1cedf;background:#283b4b;border-color:#466379}
+.staff-status-pendente{color:#f2dfb0;background:#3c3727;border-color:#756342}
+.staff-empty{font-size:12px;color:#94b3b9;line-height:1.7;padding:22px}
+.staff-pagination{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+.staff-caption{margin:16px 0 0}
+@media(max-width:800px){.staff-heading{flex-direction:column;align-items:flex-start}.staff-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.staff-appointment{grid-template-columns:1fr 1fr}.staff-status{justify-self:start}}
+@media(max-width:580px){.staff-schedule{padding:20px}.staff-filters{grid-template-columns:1fr}.staff-appointment{grid-template-columns:1fr}.staff-meta{flex-direction:column;align-items:flex-start}}

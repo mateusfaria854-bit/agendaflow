@@ -2,7 +2,7 @@
 
 ## Visão geral
 
-O produto será desenvolvido incrementalmente para um único negócio de serviços. A Fase 0 preparou a infraestrutura e os dados. A Fase 1 inclui cadastro/login e catálogo com persistência no PostgreSQL. A Fase 2 implementa jornada semanal, bloqueios e cálculo de horários disponíveis no backend. A Fase 3 transforma esses slots em reservas confirmadas, com consulta e cancelamento pelo próprio cliente. A Fase 4 oferece o calendário administrativo com filtros, reserva manual e mudança auditada de status.
+O produto será desenvolvido incrementalmente para um único negócio de serviços. A Fase 0 preparou a infraestrutura e os dados. A Fase 1 inclui cadastro/login e catálogo com persistência no PostgreSQL. A Fase 2 implementa jornada semanal, bloqueios e cálculo de horários disponíveis no backend. A Fase 3 transforma esses slots em reservas confirmadas, com consulta e cancelamento pelo próprio cliente. A Fase 4 oferece o calendário administrativo com filtros, reserva manual e mudança auditada de status. Seu complemento adiciona consulta da própria agenda para contas PROFISSIONAL vinculadas a um cadastro ativo.
 
 ```text
 React + TypeScript (apps/web)
@@ -102,3 +102,11 @@ O módulo `apps/api/src/modules/admin/routes.ts` oferece listagem filtrada por p
 `apps/api/src/modules/appointments/service.ts` centraliza o serviço de criação de reserva usado por clientes e administradores. Lock pessimista do profissional, consulta atualizada de slots e exclusão SQL continuam obrigatórios. Nenhuma rota pode informar preço ou duração pelo frontend.
 
 Alterações de estado seguem PENDENTE → CONFIRMADO futuro, ativo → CANCELADO futuro, CONFIRMADO → CONCLUIDO após término. Mudança de status e registro em `audit_events` são atômicos. Veja o [ADR 0005](adr/0005-calendario-admin.md) e as especificações da [Fase 4](../specs/005-operacao-administrativa/spec.md).
+
+## Área profissional (complemento da Fase 4)
+
+O módulo `apps/api/src/modules/staff/routes.ts` exige papel PROFISSIONAL e deriva exclusivamente da sessão a identidade da agenda, por `professionals.user_id`. Os clientes e administradores não acessam essas rotas. Parâmetros como `professionalId` são rejeitados no endpoint de agenda profissional; um usuário só vê os próprios atendimentos.
+
+O campo `professionals.user_id` já existe com restrição UNIQUE e chave estrangeira em `0001_initial.sql`. O comando `npm run staff:provision` usa `apps/api/src/modules/staff/provision.ts` para criar usuário PROFISSIONAL com senha scrypt, vinculá-lo e auditar a operação, tudo em uma única transação. O provisionamento exige nome, e-mail, senha e ID do profissional, sem senhas padrão. Contas existentes não são promovidas.
+
+O frontend `StaffSchedule` é somente leitura, com filtros por período/status e paginação. A resposta inclui nome do cliente para identificação do atendimento, mas não inclui seu e-mail, preço ou informações de outros profissionais. Veja [ADR 0006](adr/0006-vinculo-profissional.md).

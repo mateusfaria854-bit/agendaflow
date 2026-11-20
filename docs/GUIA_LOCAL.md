@@ -138,3 +138,31 @@ PATCH /api/v1/admin/appointments/:id/status
 ```
 
 Não há migração nova nesta fase; os dados já são suportados pelas tabelas `appointments` e `audit_events` iniciais. Os testes E2E de navegador, revisão de segurança final e deploy demonstrativo ficam para a Fase 5.
+
+## Complemento da Fase 4: criar login de profissional
+
+No painel ADMIN, cadastre um profissional e copie o **ID para provisionar conta** exibido na lista administrativa. O cadastro público cria somente CLIENTE. Para habilitar o acesso de um profissional, abra o PowerShell no diretório do AgendaFlow com PostgreSQL funcionando e defina as variáveis temporárias (substitua o ID pela UUID real do profissional):
+
+```powershell
+$env:PROFESSIONAL_ID = "00000000-0000-0000-0000-000000000001"
+$env:STAFF_NAME = "Profissional Local"
+$env:STAFF_EMAIL = "profissional-local@example.invalid"
+$secret = Read-Host "Senha forte do profissional (12+ caracteres)" -AsSecureString
+$env:STAFF_PASSWORD = [System.Net.NetworkCredential]::new("", $secret).Password
+npm run staff:provision
+Remove-Item Env:STAFF_PASSWORD
+Remove-Item Env:STAFF_EMAIL
+Remove-Item Env:STAFF_NAME
+Remove-Item Env:PROFESSIONAL_ID
+```
+
+O ID e o e-mail acima são apenas exemplos, não são uma conta pronta. Não use credenciais reais nem coloque a senha nos arquivos versionados. O comando falha sem um profissional existente, se o e-mail já estiver cadastrado ou se houver conta associada. Não promove contas CLIENTE/ADMIN existentes.
+
+Após executar o provisionamento, faça login pelo formulário normal com o e-mail e a senha definidos. O papel PROFISSIONAL verá **Seus atendimentos, com privacidade**, com filtros de data/status e paginação. Esta área não permite alterar reservas e não revela dados financeiros ou e-mails de clientes. Somente o administrador gerencia status e reservas manuais.
+
+```text
+GET /api/v1/staff/me
+GET /api/v1/staff/appointments?from=YYYY-MM-DD&to=YYYY-MM-DD&status=CONFIRMADO&offset=0
+```
+
+A associação depende da coluna `professionals.user_id`, que já existia desde a migração inicial. Nenhuma alteração do schema foi necessária. Revise a segurança e realize testes E2E em navegador antes de qualquer publicação externa.

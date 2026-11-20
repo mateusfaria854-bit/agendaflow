@@ -4,13 +4,14 @@ import AvailabilityPanel from '../availability/AvailabilityPanel.js';
 import AvailabilityAdmin from '../availability/AvailabilityAdmin.js';
 import BookingsPanel from '../appointments/BookingsPanel.js';
 import AdminCalendar from '../admin/AdminCalendar.js';
+import StaffSchedule from '../staff/StaffSchedule.js';
 import './portal.css';
 
 type Role = 'CLIENTE' | 'PROFISSIONAL' | 'ADMIN';
 type User = {id:string;name:string;email:string;role:Role};
 type Service = {id:string;name:string;durationMinutes:number;priceCents:number;active:boolean};
 type ProService = {id:string;name:string;active:boolean};
-type Professional = {id:string;name:string;active:boolean;services:ProService[]};
+type Professional = {id:string;name:string;active:boolean;services:ProService[];hasAccount?:boolean};
 type AuthMode = 'login' | 'register';
 
 const money=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
@@ -208,6 +209,7 @@ export default function Portal(){
       <AvailabilityPanel services={services} professionals={professionals}
         canBook={user?.role==='CLIENTE'} onBooked={updateBookings} refreshKey={bookingRevision}/>
       {user?.role==='CLIENTE'&&<BookingsPanel key={user.id} refreshKey={bookingRevision} onChanged={updateBookings}/>}
+      {user?.role==='PROFISSIONAL'&&<StaffSchedule key={user.id}/>}
 
       {user?.role==='ADMIN'&&<div className="portal-admin">
         <div className="section-heading"><div><span className="section-tag">/ ADMINISTRAÇÃO</span><h2>Gestão do catálogo.</h2></div><p>Alterações são validadas na API. Registros podem ser desativados sem perder o histórico.</p></div>
@@ -238,7 +240,8 @@ export default function Portal(){
               {proEdit&&<button type="button" className="portal-link-button" onClick={()=>{setProEdit(null);setProName('');setSelectedServices([])}}>Cancelar edição</button>}
             </form>
             <div className="portal-admin-list">{adminPros.map(p=><div key={p.id} className="portal-admin-item">
-              <div><strong>{p.name}</strong><small>{p.active?'Ativo':'Inativo'} · {p.services.map(s=>s.name).join(', ')||'Sem serviços'}</small></div>
+              <div><strong>{p.name}</strong><small>{p.active?'Ativo':'Inativo'} · {p.services.map(s=>s.name).join(', ')||'Sem serviços'} · {p.hasAccount?'Conta vinculada':'Sem acesso profissional'}</small>
+                <small>ID para provisionar conta: <code>{p.id}</code></small></div>
               <div className="portal-admin-actions"><button type="button" disabled={busy} onClick={()=>editProfessional(p)}>Editar</button><button type="button" disabled={busy} onClick={()=>void setActive(`/professionals/${p.id}`,!p.active)}>{p.active?'Desativar':'Ativar'}</button></div>
             </div>)}</div>
           </div>

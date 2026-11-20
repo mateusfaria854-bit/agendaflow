@@ -4,7 +4,7 @@
 
 **Plataforma full-stack de agendamentos** em desenvolvimento, com React, TypeScript, Node.js, Fastify e PostgreSQL. O projeto segue **Spec-Driven Development (SDD)** e prioriza uma arquitetura clara, requisitos verificáveis e prevenção de reservas duplicadas.
 
-> **Estado atual: Fase 4, operação administrativa.** Clientes podem se cadastrar, consultar horários, reservar e cancelar atendimentos futuros. Administradores podem **consultar o calendário com filtros, pesquisar clientes existentes, criar reservas manuais e gerenciar status**. Transações PostgreSQL impedem conflitos. Deploy e testes E2E em navegador continuam previstos para a Fase 5.
+> **Estado atual: Fase 4, com área profissional.** Clientes podem reservar e cancelar, administradores podem operar a agenda e **profissionais autenticados consultam somente seus próprios atendimentos**. Cada profissional precisa de uma conta vinculada explicitamente, sem cadastro público nesse papel. A Fase 5 ainda contempla testes E2E, segurança, acessibilidade e deploy demonstrativo.
 
 ## Objetivo
 
@@ -36,6 +36,7 @@ specs/
   003-disponibilidade/ Horários, jornada e bloqueios
   004-agendamentos/    Reserva, listagem e cancelamento transacionais
   005-operacao-administrativa/ Calendário e gestão administrativa
+  006-area-profissional/       Complemento de acesso por profissional
   _templates/           Modelos de spec, plan e tasks
 docs/
   ARQUITETURA.md        Limites e fluxo entre camadas
@@ -84,8 +85,9 @@ Instruções detalhadas: [Guia local](docs/GUIA_LOCAL.md).
 - **Disponibilidade (Fase 2):** expediente semanal com pausas, bloqueios excepcionais e consulta pública de horários livres, respeitando reservas ativas e duração do serviço.
 - **Agendamentos (Fase 3):** reservar um slot disponível, consultar até 50 reservas próprias e cancelar as futuras; proteção contra conflitos, preço definido pelo servidor e auditoria no PostgreSQL.
 - **Calendário administrativo (Fase 4):** listar atendimentos por período, profissional e status, paginação e totais, pesquisar contas de clientes, criar reservas manuais e alterar estados com regras de transição.
+- **Área profissional (complemento da Fase 4):** acesso pessoal à própria agenda, filtros de data/status, paginação e proteção contra consulta de outros profissionais, sem e-mail de cliente ou dados financeiros.
 
-O primeiro administrador é criado pelo comando local `npm run admin:create`, sem credenciais de demonstração publicadas. Consulte o [Guia local](docs/GUIA_LOCAL.md) para configurar as variáveis temporárias e usar o painel. **O sistema já permite agendamentos reais no ambiente local, sem integração de pagamentos ou envio de notificações.**
+O primeiro administrador é criado pelo comando local `npm run admin:create`; uma conta profissional é provisionada com `npm run staff:provision` e vinculada a um profissional previamente cadastrado. Nenhum desses comandos possui credenciais padrão. Consulte o [Guia local](docs/GUIA_LOCAL.md) para configurar as variáveis temporárias e usar o painel. **O sistema já permite agendamentos reais no ambiente local, sem integração de pagamentos ou envio de notificações.**
 
 ### Endpoints atuais
 
@@ -109,6 +111,8 @@ O primeiro administrador é criado pelo comando local `npm run admin:create`, se
 | GET | `/api/v1/admin/clients?query=` | ADMIN, pesquisa de clientes existentes |
 | POST | `/api/v1/admin/appointments` | ADMIN, reserva manual com as mesmas regras do cliente |
 | PATCH | `/api/v1/admin/appointments/:id/status` | ADMIN, transições autorizadas e auditadas |
+| GET | `/api/v1/staff/me` | PROFISSIONAL com conta vinculada e cadastro ativo |
+| GET | `/api/v1/staff/appointments?from=&to=&status=&offset=` | PROFISSIONAL, somente própria agenda |
 
 ### Como testar o calendário administrativo
 
@@ -120,6 +124,15 @@ O primeiro administrador é criado pelo comando local `npm run admin:create`, se
 
 A pesquisa de clientes e a lista de reservas são acessíveis apenas ao administrador. **Não há pagamentos, e-mails automáticos, deploy de produção nem testes E2E em navegador nesta fase.**
 
+### Como habilitar a área profissional
+
+1. Cadastre um profissional no painel ADMIN e copie o **ID para provisionar conta** exibido abaixo do nome.
+2. Configure temporariamente `PROFESSIONAL_ID`, `STAFF_NAME`, `STAFF_EMAIL` e `STAFF_PASSWORD` no terminal. A senha precisa ter entre 12 e 128 caracteres.
+3. Execute `npm run staff:provision`. Esse comando cria uma conta PROFISSIONAL exclusiva e a associa à agenda; não converte nem promove contas existentes.
+4. Entre com essa conta no site. O painel **Sua agenda profissional** permite consultar somente os seus próprios atendimentos por período e status.
+
+Veja os comandos PowerShell e os cuidados com credenciais no [Guia local](docs/GUIA_LOCAL.md). A agenda do profissional é **somente leitura**. Ações administrativas continuam restritas ao ADMIN.
+
 ## Testes e verificações
 
 ```bash
@@ -129,13 +142,13 @@ npm run db:seed
 npm run db:verify
 ```
 
-A CI executa build, testes, verificações arquiteturais, migrações e integração real com PostgreSQL, incluindo autenticação, controle de acesso, catálogo, reserva concorrente, agenda administrativa, filtros e transições de status. O seed é idempotente.
+A CI executa build, testes, verificações arquiteturais, migrações e integração real com PostgreSQL, incluindo autenticação, controle de acesso, catálogo, reserva concorrente, agenda administrativa, isolamento da agenda profissional, filtros e transições de status. O seed é idempotente.
 
 ## Processo SDD
 
 Cada funcionalidade tem três documentos versionados em `specs/NNN-nome/`: `spec.md` (requisitos e aceite), `plan.md` (arquitetura e dados), e `tasks.md` (execução e testes). O conjunto de princípios está em [specs/constitution.md](specs/constitution.md).
 
-Especificações implementadas: [Fundação](specs/000-fundacao/spec.md), [Autenticação](specs/001-autenticacao/spec.md), [Catálogo](specs/002-catalogo/spec.md), [Disponibilidade](specs/003-disponibilidade/spec.md), [Agendamentos](specs/004-agendamentos/spec.md) e [Operação administrativa](specs/005-operacao-administrativa/spec.md). A próxima fase é a revisão de segurança, acessibilidade, testes E2E e publicação demonstrativa.
+Especificações implementadas: [Fundação](specs/000-fundacao/spec.md), [Autenticação](specs/001-autenticacao/spec.md), [Catálogo](specs/002-catalogo/spec.md), [Disponibilidade](specs/003-disponibilidade/spec.md), [Agendamentos](specs/004-agendamentos/spec.md) e [Operação administrativa](specs/005-operacao-administrativa/spec.md), incluindo o [complemento de área profissional](specs/006-area-profissional/spec.md). A próxima fase é a revisão de segurança, acessibilidade, testes E2E e publicação demonstrativa.
 
 ## Próximas fases
 
@@ -143,7 +156,7 @@ Confira o [Roadmap](docs/ROADMAP.md) e as [Issues planejadas](https://github.com
 
 ## Segurança e escopo
 
-O frontend não acessa o banco diretamente. A API verifica autenticação e permissões administrativas; reservas do cliente e reservas manuais passam pelo mesmo serviço transacional. O calendário administrativo só devolve dados de clientes aos administradores. Mudanças de status obedecem uma máquina de estados com auditoria. O PostgreSQL impede sobreposição de reservas `PENDENTE` e `CONFIRMADO`. O cancelamento preserva o histórico e libera o horário. Pagamentos e notificações ainda não estão implementados.
+O frontend não acessa o banco diretamente. A API verifica autenticação e permissões administrativas; reservas do cliente e reservas manuais passam pelo mesmo serviço transacional. O calendário administrativo só devolve informações administrativas aos administradores; a agenda do profissional consulta apenas agendamentos vinculados à própria sessão, sem e-mail do cliente ou valores. Mudanças de status obedecem uma máquina de estados com auditoria. O PostgreSQL impede sobreposição de reservas `PENDENTE` e `CONFIRMADO`. O cancelamento preserva o histórico e libera o horário. Pagamentos e notificações ainda não estão implementados.
 
 Não são utilizadas credenciais de produção ou dados reais. Os valores em `compose.yaml` são apenas para desenvolvimento local.
 
