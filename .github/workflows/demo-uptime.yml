@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 concurrency:
   group: agendaflow-demo-uptime
@@ -62,3 +63,40 @@ jobs:
             "$DEMO_BASE_URL/favicon.svg" -o /tmp/agendaflow-icon.svg
           grep -qi '<svg' /tmp/agendaflow-icon.svg
           echo "Frontend e favicon disponíveis"
+
+      - name: Abrir incidente no GitHub quando a demo falhar
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          label=agenda-demo-uptime
+          gh label create "$label" -R "$GITHUB_REPOSITORY" --color "B42318" \
+            --description "Incidentes de disponibilidade da demonstracao" --force
+          issue="$(gh issue list -R "$GITHUB_REPOSITORY" --label "$label" \
+            --state open --json number --jq '.[0].number // empty')"
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [[ -z "$issue" ]]; then
+            gh issue create -R "$GITHUB_REPOSITORY" \
+              --title "AgendaFlow: demonstracao indisponivel" \
+              --label "$label" \
+              --body "A verificacao externa HTTPS, API, frontend ou banco falhou.\n\nExecucao: $run_url\n\nNao incluir dados de clientes neste incidente."
+          else
+            gh issue comment "$issue" -R "$GITHUB_REPOSITORY" \
+              --body "Nova falha detectada. Verificar execucao: $run_url"
+          fi
+      - name: Encerrar incidente quando o servico recuperar
+        if: ${{ success() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          issue="$(gh issue list -R "$GITHUB_REPOSITORY" \
+            --label agenda-demo-uptime --state open --json number --jq '.[0].number // empty')"
+          if [[ -n "$issue" ]]; then
+            run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            gh issue close "$issue" -R "$GITHUB_REPOSITORY" \
+              --comment "Recuperacao confirmada pelos testes externos de HTTPS, frontend, API e PostgreSQL. $run_url"
+          fi
