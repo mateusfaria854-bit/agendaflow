@@ -118,3 +118,11 @@ O GitHub Actions executa dois workflows: `ci.yml` faz build, testes de API, migr
 O backend aplica headers `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` e `Referrer-Policy: no-referrer`. Produção requer `WEB_ORIGIN` HTTPS para manter a configuração dos cookies segura. O caminho `/api/v1` permanece na mesma origem do frontend, via reverse proxy.
 
 A implantação externa com dados fictícios ainda **não foi executada**. Veja [Guia de Deploy](DEPLOY_DEMO.md) para TLS, segredos, backups, restauração, migrações e rollback. O sistema ainda precisa de medidas de segurança operacionais adicionais antes de usar dados de clientes reais.
+
+## Contêiner de demonstração (complemento da Fase 5)
+
+O `Dockerfile` constrói React e TypeScript API em estágios separados e remove dependências de desenvolvimento no runtime. `@fastify/static` serve o conteúdo de `apps/web/dist` quando `SERVE_WEB=true`, preservando `/api/v1` e cookies HttpOnly no **mesmo domínio**. Arquivos inexistentes e rotas inválidas da API recebem 404, sem converter erro de API em HTML do React.
+
+O container roda Node.js 22 sem root, usa `PORT` do provedor e `HOST=0.0.0.0`. `WEB_ORIGIN` HTTPS é obrigatório em `NODE_ENV=production`. PostgreSQL não fica dentro da imagem: o deploy precisa de `DATABASE_URL`, de migrações em pré-deploy e de banco privado gerenciado. `DEMO_MODE=true` impede cadastros com e-mails reais, mas não substitui prevenção contra abuso. CI verifica build Docker, smoke test da API/HTML e E2E da experiência em navegador.
+
+A hospedagem externa ainda depende de conexão ao provedor e de checagem operacional. Consultar [DEPLOY_DEMO.md](DEPLOY_DEMO.md).

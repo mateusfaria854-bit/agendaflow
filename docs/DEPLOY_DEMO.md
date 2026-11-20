@@ -71,3 +71,34 @@ Não execute restauração sobre produção sem plano de interrupção e confirm
 ## Pendências antes de produção real
 
 Política de retenção/eliminação de dados pessoais, recuperação de senha, limitação de requisições entre múltiplas instâncias, revisão jurídica LGPD, proteção contra abuso/cadastro automatizado, backups automáticos com testes de restauração, alertas e auditoria de segurança. O MVP é adequado para demonstração com dados fictícios, não para operar clientes reais sem essas medidas.
+
+## Caminho sugerido: Railway com um único serviço web e PostgreSQL gerenciado
+
+O repositório possui `Dockerfile` na raiz e não usa configuração Railway descontinuada. A imagem serve **React e Fastify no mesmo serviço web**, portanto é necessário apenas um serviço de aplicação e um serviço PostgreSQL separado.
+
+1. Conecte o repositório `mateusfaria854-bit/agendaflow` ao projeto Railway. Configure a origem GitHub para seguir a branch `main`, com root directory na **raiz** do monorepo. Não realize o primeiro deploy sem as variáveis de ambiente e o banco.
+2. Adicione um banco PostgreSQL gerenciado pelo provedor, mantendo a conexão na rede privada do projeto. Configure a variável `DATABASE_URL` no serviço web como referência ao `DATABASE_URL` do serviço PostgreSQL, usando a interface de variáveis do Railway. Evite expor o banco à internet.
+3. Configure as variáveis do serviço web: `NODE_ENV=production`, `SERVE_WEB=true`, `HOST=0.0.0.0`, `BUSINESS_TIMEZONE=America/Sao_Paulo`, `DEMO_MODE=true` e `WEB_ORIGIN=https://DOMINIO_PUBLICO_VALIDO`. O valor de `PORT` será fornecido pelo provedor, não fixe um valor conflitante.
+4. Gere/configure o domínio HTTPS do serviço web no painel do provedor. Só então defina `WEB_ORIGIN` com a origem exata do domínio, sem barra no fim, antes de liberar o site. Se o provedor fornecer a variável `RAILWAY_PUBLIC_DOMAIN`, ela contém apenas o hostname, então use o prefixo `https://`.
+5. Configure o comando **pre-deploy** da aplicação como `npm run db:migrate:runtime -w @agendaflow/api && npm run db:seed:runtime -w @agendaflow/api` somente no **banco descartável da demonstração**. O seed é idempotente e nunca cria usuários/senhas padrão. Em ambiente real, remova o seed do pre-deploy.
+6. Defina o healthcheck como `/api/v1/ready`. A aplicação só ficará pronta quando conectar ao PostgreSQL. Depois verifique `/api/v1/health`, `/api/v1/ready`, `/`, `/favicon.svg` e o fluxo de reserva/cancelamento sob HTTPS.
+7. Configure limites contra abuso e monitoramento externo, faça teste de backup/restauração e defina política de expurgo/reset das contas e reservas de demonstração. Não publique a URL no README até tudo passar.
+
+### Comandos de runtime dentro da imagem
+
+Os scripts compilados funcionam sem `tsx`, removido do contêiner final:
+
+```bash
+npm run db:migrate:runtime -w @agendaflow/api
+npm run db:seed:runtime -w @agendaflow/api
+```
+
+Para criar contas ADMIN/PROFISSIONAL fictícias em ambiente controlado, configure as variáveis exigidas pelo CLI e execute `npm run admin:create:runtime -w @agendaflow/api` ou `npm run staff:provision:runtime -w @agendaflow/api`. Nunca coloque essas senhas no Dockerfile, em commits, na URL ou no README.
+
+### Proteção do modo demo
+
+Com `DEMO_MODE=true`, o cadastro de clientes rejeita e-mails fora de `@example.invalid`. O usuário deve utilizar nomes fictícios e uma senha descartável, nunca sua senha pessoal. O modo demo não garante anonimização completa, não impede abuso automatizado e não implementa expurgo automático. **Não abra o serviço para o público antes de definir retenção, limitação de requisições e monitoramento.**
+
+### Validação antes de compartilhar a URL
+
+O workflow [Container de demonstração](../.github/workflows/container-demo.yml) valida a imagem Docker, o frontend, o endpoint `/api/v1/health`, o 404 de API e a proteção de origem. O workflow [E2E](../.github/workflows/e2e.yml) testa a experiência com PostgreSQL descartável no CI. Nenhum deles substitui conferir o site publicado em HTTPS, o healthcheck, o backup e a disponibilidade contínua.

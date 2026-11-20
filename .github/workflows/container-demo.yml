@@ -1,0 +1,44 @@
+name: Container de demonstração
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  container:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compilar imagem de produção
+        run: docker build --tag agendaflow:ci .
+      - name: Iniciar contêiner com origem HTTPS fictícia
+        run: |
+          docker run -d --name agendaflow-demo -p 127.0.0.1:3333:3333 \
+            -e WEB_ORIGIN=https://demo.example.invalid \
+            -e DATABASE_URL=postgresql://ficticio:ficticio@127.0.0.1:5432/nao_utilizar \
+            agendaflow:ci
+          for attempt in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:3333/api/v1/health > /tmp/agenda-health.json; then
+              break
+            fi
+            sleep 2
+          done
+      - name: Verificar frontend, API e isolamento de rotas
+        run: |
+          set -eu
+          curl -fsS http://127.0.0.1:3333/ | grep -q -i 'AgendaFlow'
+          curl -fsS http://127.0.0.1:3333/api/v1/health | grep -q '"status":"ok"'
+          test "$(curl -s -o /tmp/agenda-missing -w '%{http_code}' http://127.0.0.1:3333/api/v1/rota-inexistente)" = 404
+          grep -q 'Rota não encontrada' /tmp/agenda-missing
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://origem-hostil.example' http://127.0.0.1:3333/api/v1/auth/logout)" = 403
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3333/favicon.svg)" = 200
+      - name: Logs da aplicação em falha
+        if: failure()
+        run: docker logs agendaflow-demo || true
+      - name: Encerrar contêiner
+        if: always()
+        run: docker rm -f agendaflow-demo || true
