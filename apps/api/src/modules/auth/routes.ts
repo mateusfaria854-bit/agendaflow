@@ -20,6 +20,33 @@ const registerBody = {
 };
 const WINDOW = 15 * 60 * 1000;
 const attempts = new Map<string, {count: number; resetAt: number}>();
+// Limite conservador de cadastros em uma única instância de demo.
+// Não substitui proteção distribuída de borda para produção multi-réplica.
+const demoRegistrations = new Map<string, {count: number; resetAt: number}>();
+const DEMO_REGISTER_LIMIT = 5;
+const DEMO_REGISTER_WINDOW_MS = 15 * 60 * 1000;
+
+function allowDemoRegistration(ip: string): boolean {
+  const now = Date.now();
+  let entry = demoRegistrations.get(ip);
+  if (entry && entry.resetAt <= now) {
+    demoRegistrations.delete(ip);
+    entry = undefined;
+  }
+  if (!entry) {
+    if (demoRegistrations.size >= 5000) {
+      for (const [key, value] of demoRegistrations) {
+        if (value.resetAt <= now) demoRegistrations.delete(key);
+      }
+      if (demoRegistrations.size >= 5000) return false;
+    }
+    demoRegistrations.set(ip, {count: 1, resetAt: now + DEMO_REGISTER_WINDOW_MS});
+    return true;
+  }
+  if (entry.count >= DEMO_REGISTER_LIMIT) return false;
+  entry.count++;
+  return true;
+}
 const dummy = hashPassword('dummy-auth-verification-password');
 
 function allowAttempt(ip: string): boolean {
@@ -40,6 +67,9 @@ function publicUser(user: StoredUser | PublicUser): PublicUser {
 
 export const authRoutes: FastifyPluginAsync = async app => {
   app.post<{Body: Registration}>('/register', {schema: {body: registerBody}}, async (request, reply) => {
+    if (process.env.DEMO_MODE === 'true' && !allowDemoRegistration(request.ip)) {
+      return reply.header('Retry-After', '900').code(429).send({error: 'Limite de cadastros da demonstração atingido. Tente mais tarde.'});
+    }
     const {name, email, password} = request.body;
     // Demo pública: evita recolher e-mails reais. Não é substituto para limites de abuso.
     if(process.env.DEMO_MODE==='true' && !email.trim().toLowerCase().endsWith('@example.invalid')){
