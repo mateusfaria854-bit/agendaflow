@@ -30,7 +30,7 @@ async function login(page:import('@playwright/test').Page,email:string,passwordV
 test('cliente reserva e cancela no navegador, sem reservas duplicadas',async({page},testInfo)=>{
   const email=`cliente-${testInfo.project.name}-${Date.now()}@example.invalid`;
   await page.goto('/#portal');
-  await expect(page.locator('.portal-catalog').getByText('Corte clássico')).toBeVisible();
+  await expect(page.locator('.portal-catalog .portal-service-grid').getByRole('heading',{name:'Corte clássico',exact:true})).toBeVisible();
   await page.locator('.portal-tabs').getByRole('button',{name:'Criar conta'}).click();
   const form=page.locator('.portal-panel .portal-form').first();
   await form.getByLabel('Nome completo').fill('Cliente E2E Fictício');
