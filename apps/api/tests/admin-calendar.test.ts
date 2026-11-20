@@ -105,12 +105,12 @@ test('Fase 4: calendário, filtros, segurança, reserva manual e transições de
     assert.equal(listing.json().appointments[0].clientName,'Cliente da agenda');
     assert.ok(!listing.body.includes('password_hash'));
     const filtered=await app.inject({method:'GET',
-      url:path+`&professionalId=${proId}&status=CONFIRMADO&offset=0`,
+      url:path+'&status=CONFIRMADO&offset=0',
       headers:{cookie:admin}});
     assert.equal(filtered.statusCode,200,filtered.body);
     assert.equal(filtered.json().total,1);
     const otherPro=await app.inject({method:'GET',
-      url:path+`&professionalId=${randomUUID()}`,headers:{cookie:admin}});
+      url:path.replace(`professionalId=${proId}`,`professionalId=${randomUUID()}`),headers:{cookie:admin}});
     assert.equal(otherPro.json().total,0);
     assert.equal((await app.inject({method:'GET',
       url:path+'&status=INVALIDO',headers:{cookie:admin}})).statusCode,400);
