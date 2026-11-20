@@ -1,0 +1,83 @@
+name: Navegador E2E e acessibilidade
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  navegador:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      DATABASE_URL: postgresql://agendaflow:agendaflow_local@127.0.0.1:5432/agendaflow
+      WEB_ORIGIN: http://127.0.0.1:5173
+      BUSINESS_TIMEZONE: America/Sao_Paulo
+      E2E_ADMIN_EMAIL: admin-e2e@example.invalid
+      E2E_ADMIN_PASSWORD: FicticiaSenhaE2EAdministrador2026!
+      E2E_STAFF_EMAIL: staff-e2e@example.invalid
+      E2E_STAFF_PASSWORD: FicticiaSenhaE2EProfissional2026!
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: agendaflow
+          POSTGRES_PASSWORD: agendaflow_local
+          POSTGRES_DB: agendaflow
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U agendaflow -d agendaflow"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar dependências
+        run: npm install --no-audit --no-fund
+      - name: Instalar Chromium e dependências de navegador
+        run: npx playwright install --with-deps chromium
+      - name: Compilar aplicação e preparar dados descartáveis
+        run: |
+          npm run build
+          npm run db:migrate
+          npm run db:seed
+      - name: Criar somente contas fictícias do CI
+        run: |
+          ADMIN_NAME="Administrador E2E" ADMIN_EMAIL="$E2E_ADMIN_EMAIL" ADMIN_PASSWORD="$E2E_ADMIN_PASSWORD" npm run admin:create
+          PROFESSIONAL_ID="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" STAFF_NAME="Profissional E2E" STAFF_EMAIL="$E2E_STAFF_EMAIL" STAFF_PASSWORD="$E2E_STAFF_PASSWORD" npm run staff:provision
+      - name: Iniciar API e frontend
+        shell: bash
+        run: |
+          npm run start -w @agendaflow/api > /tmp/agendaflow-api.log 2>&1 &
+          npm run dev:web > /tmp/agendaflow-web.log 2>&1 &
+          for attempt in {1..60}; do
+            if curl -fsS http://127.0.0.1:3333/api/v1/ready >/dev/null && curl -fsS http://127.0.0.1:5173 >/dev/null; then
+              echo "Aplicação local respondendo."
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Servidores não iniciaram."
+          tail -80 /tmp/agendaflow-api.log /tmp/agendaflow-web.log
+          exit 1
+      - name: Fluxos Playwright Chromium desktop e celular
+        run: npx playwright test
+      - name: Logs para investigar falhas
+        if: failure()
+        run: |
+          tail -100 /tmp/agendaflow-api.log || true
+          tail -100 /tmp/agendaflow-web.log || true
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-evidence
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

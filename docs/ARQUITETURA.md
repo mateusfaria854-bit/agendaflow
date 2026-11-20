@@ -110,3 +110,11 @@ O módulo `apps/api/src/modules/staff/routes.ts` exige papel PROFISSIONAL e deri
 O campo `professionals.user_id` já existe com restrição UNIQUE e chave estrangeira em `0001_initial.sql`. O comando `npm run staff:provision` usa `apps/api/src/modules/staff/provision.ts` para criar usuário PROFISSIONAL com senha scrypt, vinculá-lo e auditar a operação, tudo em uma única transação. O provisionamento exige nome, e-mail, senha e ID do profissional, sem senhas padrão. Contas existentes não são promovidas.
 
 O frontend `StaffSchedule` é somente leitura, com filtros por período/status e paginação. A resposta inclui nome do cliente para identificação do atendimento, mas não inclui seu e-mail, preço ou informações de outros profissionais. Veja [ADR 0006](adr/0006-vinculo-profissional.md).
+
+## Qualidade e preparação para deploy (Fase 5)
+
+O GitHub Actions executa dois workflows: `ci.yml` faz build, testes de API, migrações e integridade do PostgreSQL; `e2e.yml` inicia PostgreSQL descartável, API e Vite e executa Playwright Chromium desktop/mobile com usuários fictícios. O axe avalia o painel de autenticação, enquanto o atalho de teclado para o conteúdo principal e a preferência por movimento reduzido oferecem melhorias de navegação.
+
+O backend aplica headers `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` e `Referrer-Policy: no-referrer`. Produção requer `WEB_ORIGIN` HTTPS para manter a configuração dos cookies segura. O caminho `/api/v1` permanece na mesma origem do frontend, via reverse proxy.
+
+A implantação externa com dados fictícios ainda **não foi executada**. Veja [Guia de Deploy](DEPLOY_DEMO.md) para TLS, segredos, backups, restauração, migrações e rollback. O sistema ainda precisa de medidas de segurança operacionais adicionais antes de usar dados de clientes reais.

@@ -4,7 +4,7 @@
 
 **Plataforma full-stack de agendamentos** em desenvolvimento, com React, TypeScript, Node.js, Fastify e PostgreSQL. O projeto segue **Spec-Driven Development (SDD)** e prioriza uma arquitetura clara, requisitos verificáveis e prevenção de reservas duplicadas.
 
-> **Estado atual: Fase 4, com área profissional.** Clientes podem reservar e cancelar, administradores podem operar a agenda e **profissionais autenticados consultam somente seus próprios atendimentos**. Cada profissional precisa de uma conta vinculada explicitamente, sem cadastro público nesse papel. A Fase 5 ainda contempla testes E2E, segurança, acessibilidade e deploy demonstrativo.
+> **Estado atual: Fase 5, validação e preparação de demonstração.** Clientes reservam e cancelam, administradores operam a agenda e profissionais consultam seus próprios atendimentos. A etapa atual adiciona testes Playwright desktop/mobile, verificação de acessibilidade e proteções HTTP. **A aplicação ainda não foi implantada em servidor público**; instruções de deploy, backup e rollback estão documentadas.
 
 ## Objetivo
 
@@ -18,7 +18,7 @@ Organizar serviços, profissionais e horários para um único negócio de atendi
 | Backend | Node.js 22, Fastify 5, TypeScript |
 | Banco | PostgreSQL 16, migrações SQL e dados fictícios |
 | Organização | Npm workspaces, contratos compartilhados, SDD, ADRs |
-| Qualidade | Node Test Runner, testes de API, testes transacionais do banco, GitHub Actions |
+| Qualidade | Node Test Runner, PostgreSQL de teste, Playwright, axe, GitHub Actions |
 
 ## Organização do repositório
 
@@ -37,6 +37,7 @@ specs/
   004-agendamentos/    Reserva, listagem e cancelamento transacionais
   005-operacao-administrativa/ Calendário e gestão administrativa
   006-area-profissional/       Complemento de acesso por profissional
+  007-polimento-publicacao/    Testes E2E, segurança e preparação de demo
   _templates/           Modelos de spec, plan e tasks
 docs/
   ARQUITETURA.md        Limites e fluxo entre camadas
@@ -80,12 +81,14 @@ Instruções detalhadas: [Guia local](docs/GUIA_LOCAL.md).
 - **Cadastro e login:** clientes criam conta; senhas usam scrypt e salt aleatório.
 - **Sessões:** cookies HttpOnly/SameSite, hashes dos tokens no PostgreSQL, logout e expiração.
 - **Permissões:** endpoints de escrita do catálogo exigem administrador; cadastro público nunca cria admin.
+- **Segurança HTTP:** respostas da API usam no-store, nosniff, Referrer-Policy e proteção contra iframe; em produção WEB_ORIGIN deve ser HTTPS.
 - **Catálogo:** listagem pública de serviços e profissionais ativos.
 - **Painel administrativo:** criação, edição, desativação e vínculo de profissionais a serviços.
 - **Disponibilidade (Fase 2):** expediente semanal com pausas, bloqueios excepcionais e consulta pública de horários livres, respeitando reservas ativas e duração do serviço.
 - **Agendamentos (Fase 3):** reservar um slot disponível, consultar até 50 reservas próprias e cancelar as futuras; proteção contra conflitos, preço definido pelo servidor e auditoria no PostgreSQL.
 - **Calendário administrativo (Fase 4):** listar atendimentos por período, profissional e status, paginação e totais, pesquisar contas de clientes, criar reservas manuais e alterar estados com regras de transição.
 - **Área profissional (complemento da Fase 4):** acesso pessoal à própria agenda, filtros de data/status, paginação e proteção contra consulta de outros profissionais, sem e-mail de cliente ou dados financeiros.
+- **Qualidade (Fase 5):** testes Playwright Chromium desktop/mobile, verificação básica WCAG com axe, skip link, movimento reduzido, headers HTTP de segurança e guia de deploy seguro.
 
 O primeiro administrador é criado pelo comando local `npm run admin:create`; uma conta profissional é provisionada com `npm run staff:provision` e vinculada a um profissional previamente cadastrado. Nenhum desses comandos possui credenciais padrão. Consulte o [Guia local](docs/GUIA_LOCAL.md) para configurar as variáveis temporárias e usar o painel. **O sistema já permite agendamentos reais no ambiente local, sem integração de pagamentos ou envio de notificações.**
 
@@ -133,6 +136,16 @@ A pesquisa de clientes e a lista de reservas são acessíveis apenas ao administ
 
 Veja os comandos PowerShell e os cuidados com credenciais no [Guia local](docs/GUIA_LOCAL.md). A agenda do profissional é **somente leitura**. Ações administrativas continuam restritas ao ADMIN.
 
+### Testes reais de navegador (Fase 5)
+
+O workflow [Navegador E2E e acessibilidade](.github/workflows/e2e.yml) inicializa banco PostgreSQL descartável, cria contas **fictícias** e testa Chromium desktop e emulação mobile. Inclui registro, reserva e cancelamento por cliente, consulta do administrador, área profissional e navegação por teclado. O painel de autenticação recebe checagem axe de regras WCAG A/AA; isso não substitui auditoria completa de acessibilidade.
+
+Para rodar localmente, inicie API, Vite e PostgreSQL (veja [Guia Local](docs/GUIA_LOCAL.md)), execute `npx playwright install chromium` e `npm run test:e2e`. Para ativar também os testes de ADMIN e PROFISSIONAL, configure `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD`, `E2E_STAFF_EMAIL` e `E2E_STAFF_PASSWORD` com **credenciais fictícias de ambiente descartável**. Não aponte os testes para uma instância com clientes reais.
+
+### Publicação demonstrativa
+
+A publicação externa ainda **não foi realizada**. O documento [Implantação demonstrativa](docs/DEPLOY_DEMO.md) explica hospedagem HTTPS sob uma origem única, variáveis de ambiente, verificações de saúde, backup PostgreSQL, restauração e rollback. Nenhuma URL de demonstração é anunciada sem estar ativa e verificada. Pagamentos, notificações, recuperação de senha e medidas completas de segurança operacional continuam fora do MVP.
+
 ## Testes e verificações
 
 ```bash
@@ -142,23 +155,23 @@ npm run db:seed
 npm run db:verify
 ```
 
-A CI executa build, testes, verificações arquiteturais, migrações e integração real com PostgreSQL, incluindo autenticação, controle de acesso, catálogo, reserva concorrente, agenda administrativa, isolamento da agenda profissional, filtros e transições de status. O seed é idempotente.
+O CI [Qualidade e banco](.github/workflows/ci.yml) executa build, testes, verificações arquiteturais, migrações e integração real com PostgreSQL. O workflow separado [E2E e acessibilidade](.github/workflows/e2e.yml) testa o navegador com dados fictícios. Ambos precisam passar no Pull Request. O seed é idempotente.
 
 ## Processo SDD
 
 Cada funcionalidade tem três documentos versionados em `specs/NNN-nome/`: `spec.md` (requisitos e aceite), `plan.md` (arquitetura e dados), e `tasks.md` (execução e testes). O conjunto de princípios está em [specs/constitution.md](specs/constitution.md).
 
-Especificações implementadas: [Fundação](specs/000-fundacao/spec.md), [Autenticação](specs/001-autenticacao/spec.md), [Catálogo](specs/002-catalogo/spec.md), [Disponibilidade](specs/003-disponibilidade/spec.md), [Agendamentos](specs/004-agendamentos/spec.md) e [Operação administrativa](specs/005-operacao-administrativa/spec.md), incluindo o [complemento de área profissional](specs/006-area-profissional/spec.md). A próxima fase é a revisão de segurança, acessibilidade, testes E2E e publicação demonstrativa.
+Especificações implementadas: [Fundação](specs/000-fundacao/spec.md), [Autenticação](specs/001-autenticacao/spec.md), [Catálogo](specs/002-catalogo/spec.md), [Disponibilidade](specs/003-disponibilidade/spec.md), [Agendamentos](specs/004-agendamentos/spec.md) e [Operação administrativa](specs/005-operacao-administrativa/spec.md), incluindo o [complemento de área profissional](specs/006-area-profissional/spec.md) e a [Fase 5](specs/007-polimento-publicacao/spec.md). A publicação externa depende de ambiente autorizado e de verificações reais.
 
 ## Próximas fases
 
-Confira o [Roadmap](docs/ROADMAP.md) e as [Issues planejadas](https://github.com/mateusfaria854-bit/agendaflow/issues). O planejamento contempla identidade, catálogo de serviços e profissionais, disponibilidade, criação de reservas, operação administrativa e publicação.
+Confira o [Roadmap](docs/ROADMAP.md) e as [Issues planejadas](https://github.com/mateusfaria854-bit/agendaflow/issues). O planejamento contempla identidade, catálogo, disponibilidade, reservas, operação administrativa, testes E2E e publicação demonstrativa. O deploy não é automático e ainda depende de infraestrutura.
 
 ## Segurança e escopo
 
 O frontend não acessa o banco diretamente. A API verifica autenticação e permissões administrativas; reservas do cliente e reservas manuais passam pelo mesmo serviço transacional. O calendário administrativo só devolve informações administrativas aos administradores; a agenda do profissional consulta apenas agendamentos vinculados à própria sessão, sem e-mail do cliente ou valores. Mudanças de status obedecem uma máquina de estados com auditoria. O PostgreSQL impede sobreposição de reservas `PENDENTE` e `CONFIRMADO`. O cancelamento preserva o histórico e libera o horário. Pagamentos e notificações ainda não estão implementados.
 
-Não são utilizadas credenciais de produção ou dados reais. Os valores em `compose.yaml` são apenas para desenvolvimento local.
+Não são utilizadas credenciais de produção ou dados reais. Os valores em `compose.yaml` e no workflow E2E são apenas para ambientes descartáveis. Antes de utilizar dados reais, são necessárias mais medidas de proteção, recuperação de senha, controle distribuído de abusos, monitoramento, política de dados e revisão LGPD.
 
 ## Autoria
 

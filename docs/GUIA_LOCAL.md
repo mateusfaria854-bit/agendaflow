@@ -166,3 +166,25 @@ GET /api/v1/staff/appointments?from=YYYY-MM-DD&to=YYYY-MM-DD&status=CONFIRMADO&o
 ```
 
 A associação depende da coluna `professionals.user_id`, que já existia desde a migração inicial. Nenhuma alteração do schema foi necessária. Revise a segurança e realize testes E2E em navegador antes de qualquer publicação externa.
+
+## Fase 5: Playwright e acessibilidade
+
+O workflow `.github/workflows/e2e.yml` executa os testes E2E em uma instância CI isolada e descarta PostgreSQL e contas fictícias após a execução. Para usar localmente:
+
+```bash
+npm install
+npx playwright install chromium
+npm run dev:api
+# Em outro terminal:
+npm run dev:web
+# Com ambos funcionando, em um terceiro terminal:
+npm run test:e2e
+```
+
+No ambiente local, as verificações que exigem admin/profissional são ignoradas caso `E2E_ADMIN_EMAIL`/`E2E_ADMIN_PASSWORD` ou `E2E_STAFF_EMAIL`/`E2E_STAFF_PASSWORD` não estejam definidos. No GitHub Actions, essas contas são criadas pelo pipeline com dados totalmente fictícios. Nunca rode `test:e2e` apontando para banco real ou produção.
+
+O Playwright cobre Chromium desktop e emulação de celular. A checagem automatizada WCAG com axe examina o painel de autenticação; outros componentes devem passar também por testes manuais com leitores de tela e navegação real por teclado.
+
+## Preparar a publicação demonstrativa
+
+Consulte [DEPLOY_DEMO.md](DEPLOY_DEMO.md). São necessários origem HTTPS, proxy único para frontend e `/api/v1`, PostgreSQL privado, backups verificáveis e segredos fora do repositório. O código não contém credenciais de produção nem site público já implantado.

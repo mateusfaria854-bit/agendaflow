@@ -19,6 +19,22 @@ export function createApp(options: Options = {}) {
     ajv: {customOptions: {removeAdditional: false}},
   });
   const databaseCheck = options.databaseCheck ?? checkDatabase;
+  // Uma instância produtiva não deve emitir cookies de sessão sem HTTPS.
+  if (process.env.NODE_ENV === 'production') {
+    const origin = process.env.WEB_ORIGIN;
+    let valid = false;
+    try { valid = !!origin && new URL(origin).protocol === 'https:'; } catch { valid = false; }
+    if (!valid) throw new Error('Em produção, WEB_ORIGIN deve ser uma origem HTTPS válida.');
+  }
+  app.addHook('onSend', async (request,reply,payload) => {
+    reply.header('X-Content-Type-Options','nosniff');
+    reply.header('X-Frame-Options','DENY');
+    reply.header('Referrer-Policy','no-referrer');
+    if (request.url.startsWith('/api/v1/')) {
+      reply.header('Cache-Control','no-store');
+    }
+    return payload;
+  });
 
   app.addHook('onRequest', async (request, reply) => {
     if (['POST','PUT','PATCH','DELETE'].includes(request.method) && !checkWriteOrigin(request)) {
