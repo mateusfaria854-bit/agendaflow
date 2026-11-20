@@ -6,5 +6,5 @@
 - [x] T-704: Aplicar headers de segurança e exigir WEB_ORIGIN HTTPS em produção.
 - [x] T-705: Adicionar skip link e suporte a movimento reduzido.
 - [x] T-706: Preparar guia de publicação e backup/rollback, sem alegar deploy externo.
-- [ ] T-707: Validar pipeline e integrar as melhorias na main.
+- [x] T-707: Pipelines de qualidade e Playwright aprovados no PR #13, squash merge na main e branch temporária removida automaticamente.
 - [ ] T-708: Publicar aplicação real em infraestrutura autorizada e verificar monitoramento externo (requer configuração/credenciais do provedor).
