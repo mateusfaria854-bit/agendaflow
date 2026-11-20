@@ -41,6 +41,10 @@ function publicUser(user: StoredUser | PublicUser): PublicUser {
 export const authRoutes: FastifyPluginAsync = async app => {
   app.post<{Body: Registration}>('/register', {schema: {body: registerBody}}, async (request, reply) => {
     const {name, email, password} = request.body;
+    // Demo pública: evita recolher e-mails reais. Não é substituto para limites de abuso.
+    if(process.env.DEMO_MODE==='true' && !email.trim().toLowerCase().endsWith('@example.invalid')){
+      return reply.code(400).send({error:'Na demonstração, use apenas um e-mail fictício @example.invalid.'});
+    }
     if (!validPassword(password) || name.trim().length < 2) {
       return reply.code(400).send({error: 'Dados de cadastro inválidos.'});
     }
