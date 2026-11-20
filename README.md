@@ -4,7 +4,7 @@
 
 **Plataforma full-stack de agendamentos** em desenvolvimento, com React, TypeScript, Node.js, Fastify e PostgreSQL. O projeto segue **Spec-Driven Development (SDD)** e prioriza uma arquitetura clara, requisitos verificáveis e prevenção de reservas duplicadas.
 
-> **Estado atual: Fase 2, disponibilidade.** Além de cadastro/login e catálogo com PostgreSQL, a API calcula horários livres por jornada, duração, bloqueios e reservas ativas. A tela permite consultar horários e administrar expedientes, mas **a criação de reservas reais ainda não está disponível** (Fase 3).
+> **Estado atual: Fase 3, reservas reais.** Clientes podem se cadastrar, consultar horários, **confirmar agendamentos**, listar suas reservas e cancelar atendimentos futuros. A API revalida a disponibilidade em transação PostgreSQL e impede dupla reserva. Administração completa do calendário e notificações ainda são etapas futuras.
 
 ## Objetivo
 
@@ -34,6 +34,7 @@ specs/
   001-autenticacao/     Autenticação e perfis
   002-catalogo/        Gestão de serviços e profissionais
   003-disponibilidade/ Horários, jornada e bloqueios
+  004-agendamentos/    Reserva, listagem e cancelamento transacionais
   _templates/           Modelos de spec, plan e tasks
 docs/
   ARQUITETURA.md        Limites e fluxo entre camadas
@@ -72,7 +73,7 @@ npm run dev:web
 
 Instruções detalhadas: [Guia local](docs/GUIA_LOCAL.md).
 
-## Funcionalidades da Fase 1
+## Funcionalidades implementadas
 
 - **Cadastro e login:** clientes criam conta; senhas usam scrypt e salt aleatório.
 - **Sessões:** cookies HttpOnly/SameSite, hashes dos tokens no PostgreSQL, logout e expiração.
@@ -80,8 +81,9 @@ Instruções detalhadas: [Guia local](docs/GUIA_LOCAL.md).
 - **Catálogo:** listagem pública de serviços e profissionais ativos.
 - **Painel administrativo:** criação, edição, desativação e vínculo de profissionais a serviços.
 - **Disponibilidade (Fase 2):** expediente semanal com pausas, bloqueios excepcionais e consulta pública de horários livres, respeitando reservas ativas e duração do serviço.
+- **Agendamentos (Fase 3):** reservar um slot disponível, consultar até 50 reservas próprias e cancelar as futuras; proteção contra conflitos, preço definido pelo servidor e auditoria no PostgreSQL.
 
-O primeiro administrador é criado pelo comando local `npm run admin:create`, sem credenciais de demonstração publicadas. Consulte o [Guia local](docs/GUIA_LOCAL.md) para configurar as variáveis temporárias e usar o painel. **O sistema ainda não possui reservas reais.**
+O primeiro administrador é criado pelo comando local `npm run admin:create`, sem credenciais de demonstração publicadas. Consulte o [Guia local](docs/GUIA_LOCAL.md) para configurar as variáveis temporárias e usar o painel. **O sistema já permite agendamentos reais no ambiente local, sem integração de pagamentos ou envio de notificações.**
 
 ### Endpoints atuais
 
@@ -98,6 +100,9 @@ O primeiro administrador é criado pelo comando local `npm run admin:create`, se
 | GET | `/api/v1/admin/availability` | Admin, expediente/bloqueios |
 | PUT | `/api/v1/admin/professionals/:id/availability` | Admin, definir expediente |
 | POST/DELETE | `/api/v1/admin/blocked-periods[/id]` | Admin, bloquear e liberar períodos |
+| POST | `/api/v1/appointments` | CLIENTE, confirmar reserva |
+| GET | `/api/v1/appointments/mine` | CLIENTE, somente próprias reservas |
+| PATCH | `/api/v1/appointments/:id/cancel` | CLIENTE titular, cancelar reserva futura |
 
 ## Testes e verificações
 
@@ -114,7 +119,7 @@ A CI executa build, testes, verificações arquiteturais, migrações e testes r
 
 Cada funcionalidade tem três documentos versionados em `specs/NNN-nome/`: `spec.md` (requisitos e aceite), `plan.md` (arquitetura e dados), e `tasks.md` (execução e testes). O conjunto de princípios está em [specs/constitution.md](specs/constitution.md).
 
-Especificações implementadas: [Fundação](specs/000-fundacao/spec.md), [Autenticação](specs/001-autenticacao/spec.md), [Catálogo](specs/002-catalogo/spec.md) e [Disponibilidade](specs/003-disponibilidade/spec.md). A próxima etapa é reservar, listar e cancelar agendamentos reais.
+Especificações implementadas: [Fundação](specs/000-fundacao/spec.md), [Autenticação](specs/001-autenticacao/spec.md), [Catálogo](specs/002-catalogo/spec.md), [Disponibilidade](specs/003-disponibilidade/spec.md) e [Agendamentos](specs/004-agendamentos/spec.md). A próxima fase é a operação administrativa do calendário.
 
 ## Próximas fases
 
@@ -122,7 +127,7 @@ Confira o [Roadmap](docs/ROADMAP.md) e as [Issues planejadas](https://github.com
 
 ## Segurança e escopo
 
-O frontend não acessa o banco diretamente. A API já verifica autenticação, permissões administrativas e validações do catálogo; a criação de reservas reais continua fora do escopo. O PostgreSQL já possui a restrição para impedir sobreposição de reservas `PENDENTE` e `CONFIRMADO`; o restante das regras de negócio ainda será implementado.
+O frontend não acessa o banco diretamente. A API já verifica autenticação, permissões administrativas e validações do catálogo; a API de reservas revalida jornada, bloqueios e integridade sob transação. O PostgreSQL impede sobreposição de reservas `PENDENTE` e `CONFIRMADO`. O cancelamento preserva o histórico e libera o horário. Pagamentos e notificações ainda não estão implementados.
 
 Não são utilizadas credenciais de produção ou dados reais. Os valores em `compose.yaml` são apenas para desenvolvimento local.
 

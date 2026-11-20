@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import {api} from '../../lib/api.js';
 import AvailabilityPanel from '../availability/AvailabilityPanel.js';
 import AvailabilityAdmin from '../availability/AvailabilityAdmin.js';
+import BookingsPanel from '../appointments/BookingsPanel.js';
 import './portal.css';
 
 type Role = 'CLIENTE' | 'PROFISSIONAL' | 'ADMIN';
@@ -33,6 +34,8 @@ export default function Portal(){
   const [proEdit,setProEdit]=useState<string|null>(null);
   const [proName,setProName]=useState('');
   const [selectedServices,setSelectedServices]=useState<string[]>([]);
+  const [bookingRevision,setBookingRevision]=useState(0);
+  const updateBookings=()=>setBookingRevision(value=>value+1);
 
   async function refresh(role:Role|null){
     const [publicS,publicP]=await Promise.all([
@@ -161,7 +164,7 @@ export default function Portal(){
             <h3>Olá, {user.name}!</h3>
             <p>{user.email}</p><span className="portal-role">{user.role==='ADMIN'?'Administrador':user.role==='PROFISSIONAL'?'Profissional':'Cliente'}</span>
             <button type="button" className="portal-secondary" disabled={busy} onClick={()=>void logout()}>Sair da conta</button>
-            {user.role==='CLIENTE'&&<p className="portal-caption">A funcionalidade de reservar horários será liberada após a implementação da agenda.</p>}
+            {user.role==='CLIENTE'&&<p className="portal-caption">Você já pode escolher um horário e confirmar seu atendimento na seção Agendamentos.</p>}
           </div>:<>
             <h3>Seu espaço começa aqui.</h3>
             <p className="portal-muted">Acesse sua conta ou cadastre-se para conhecer a plataforma.</p>
@@ -201,7 +204,9 @@ export default function Portal(){
         </div>
       </div>
 
-      <AvailabilityPanel services={services} professionals={professionals}/>
+      <AvailabilityPanel services={services} professionals={professionals}
+        canBook={user?.role==='CLIENTE'} onBooked={updateBookings} refreshKey={bookingRevision}/>
+      {user?.role==='CLIENTE'&&<BookingsPanel key={user.id} refreshKey={bookingRevision} onChanged={updateBookings}/>}
 
       {user?.role==='ADMIN'&&<div className="portal-admin">
         <div className="section-heading"><div><span className="section-tag">/ ADMINISTRAÇÃO</span><h2>Gestão do catálogo.</h2></div><p>Alterações são validadas na API. Registros podem ser desativados sem perder o histórico.</p></div>
