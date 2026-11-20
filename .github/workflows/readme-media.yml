@@ -1,4 +1,5 @@
-name: Capturas do README
+name: Capturas reais para o README
+
 on:
   workflow_dispatch:
   push:
@@ -6,10 +7,99 @@ on:
     paths:
       - scripts/capture-readme.mjs
       - .github/workflows/readme-media.yml
+
 permissions:
   contents: read
+
 jobs:
-  teste:
+  imagens-reais:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: postgresql://agendaflow:agendaflow_local@127.0.0.1:5432/agendaflow
+      WEB_ORIGIN: http://127.0.0.1:5173
+      BUSINESS_TIMEZONE: America/Sao_Paulo
+      DEMO_MODE: 'true'
+      E2E_ADMIN_EMAIL: admin-e2e@example.invalid
+      E2E_ADMIN_PASSWORD: FicticiaSenhaE2EAdministrador2026!
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: agendaflow
+          POSTGRES_PASSWORD: agendaflow_local
+          POSTGRES_DB: agendaflow
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U agendaflow -d agendaflow"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
     steps:
-      - run: echo "capturas"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar dependências e Chromium
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Compilar, migrar e popular apenas banco descartável
+        run: |
+          npm run build
+          npm run db:migrate
+          npm run db:seed
+          ADMIN_NAME="Administrador de Demonstração" ADMIN_EMAIL="$E2E_ADMIN_EMAIL" ADMIN_PASSWORD="$E2E_ADMIN_PASSWORD" npm run admin:create
+      - name: Iniciar API e interface no runner
+        shell: bash
+        run: |
+          npm run start -w @agendaflow/api > /tmp/agendaflow-api.log 2>&1 &
+          npm run dev:web > /tmp/agendaflow-web.log 2>&1 &
+          for attempt in {1..60}; do
+            if curl -fsS http://127.0.0.1:3333/api/v1/ready >/dev/null && curl -fsS http://127.0.0.1:5173 >/dev/null; then
+              echo "Aplicação descartável pronta."
+              exit 0
+            fi
+            sleep 2
+          done
+          tail -80 /tmp/agendaflow-api.log /tmp/agendaflow-web.log
+          exit 1
+      - name: Fotografar a aplicação real com Playwright
+        run: node scripts/capture-readme.mjs
+      - name: Montar GIF somente a partir dos quadros capturados
+        shell: bash
+        run: |
+          if ! command -v ffmpeg >/dev/null; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          fi
+          ffmpeg -hide_banner -loglevel error -y -framerate 1/2 -i docs/media/frames/flow-%02d.png \
+            -vf 'fps=8,scale=1000:-1:flags=lanczos,palettegen' -frames:v 1 /tmp/agendaflow-palette.png
+          ffmpeg -hide_banner -loglevel error -y -framerate 1/2 -i docs/media/frames/flow-%02d.png \
+            -i /tmp/agendaflow-palette.png -filter_complex \
+            '[0:v]fps=8,scale=1000:-1:flags=lanczos[v];[v][1:v]paletteuse=dither=bayer:bayer_scale=3' \
+            -loop 0 docs/media/fluxo-agendamento.gif
+          ls -lh docs/media/*.png docs/media/*.gif
+      - name: Guardar capturas reais para publicação no repositório
+        uses: actions/upload-artifact@v4
+        with:
+          name: capturas-reais-readme
+          path: |
+            docs/media/*.png
+            docs/media/*.gif
+          retention-days: 7
+          if-no-files-found: error
+      - name: Logs para investigar falhas
+        if: failure()
+        run: |
+          tail -100 /tmp/agendaflow-api.log || true
+          tail -100 /tmp/agendaflow-web.log || true
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: debug-capturas-readme
+          path: |
+            docs/media/
+            playwright-report/
+          retention-days: 3
