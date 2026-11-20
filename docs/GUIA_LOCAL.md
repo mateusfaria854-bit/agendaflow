@@ -98,3 +98,21 @@ GET http://127.0.0.1:3333/api/v1/availability/slots?professionalId=UUID&serviceI
 ```
 
 O endpoint valida datas e limita consultas a hoje + 90 dias. O PostgreSQL continua exigindo migrações e seed via `npm run db:migrate` e `npm run db:seed`. Não foi necessária migração nova na Fase 2 porque as tabelas de disponibilidade e bloqueios já existiam desde a Fase 0.
+
+## Fase 3: criar e cancelar reservas
+
+Com a API, frontend e PostgreSQL ligados, crie uma conta **CLIENTE** pelo formulário na interface. Na seção **Encontre seu próximo horário**, escolha o serviço, profissional e data e clique em **Consultar horários**. Clique num dos horários disponíveis e confirme o agendamento.
+
+A reserva é validada novamente no servidor, que verifica expediente, bloqueios, duração, vínculo serviço/profissional e conflitos sob transação PostgreSQL. Se outra pessoa reservar primeiro, a resposta é **409**, e a interface permite consultar outro horário.
+
+A seção **Meus agendamentos**, visível somente para clientes autenticados, apresenta as últimas 50 reservas e permite cancelar atendimentos futuros. O cancelamento muda o status para `CANCELADO`, sem apagar o histórico, e libera o horário no catálogo. O administrador tem gestão do catálogo e expediente; uma agenda administrativa completa será entregue na Fase 4.
+
+APIs principais:
+
+```text
+POST  /api/v1/appointments             {professionalId,serviceId,startsAt}
+GET   /api/v1/appointments/mine        Cookie de sessão CLIENTE
+PATCH /api/v1/appointments/:id/cancel  Cookie de sessão CLIENTE titular
+```
+
+O início deve ser um timestamp UTC ISO 8601 retornado na consulta de slots; preço, término e identidade do cliente não podem ser definidos no payload. **Não há pagamentos nem notificações automáticas.** Os testes de concorrência e autorização são executados pelo GitHub Actions com PostgreSQL descartável.

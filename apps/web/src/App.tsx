@@ -15,8 +15,8 @@ const features = [
 const roadmap = [
   { phase: '00', name: 'Fundação técnica', summary: 'Monorepo, API, React, PostgreSQL, testes e SDD.', current: false },
   { phase: '01', name: 'Identidade e catálogo', summary: 'Cadastro, login, serviços e profissionais conectados à API.', current: false },
-  { phase: '02', name: 'Agenda disponível', summary: 'Expedientes, bloqueios e horários válidos calculados pela API.', current: true },
-  { phase: '03', name: 'Reserva ponta a ponta', summary: 'Agendar, listar e cancelar sem dupla reserva.', current: false },
+  { phase: '02', name: 'Agenda disponível', summary: 'Expedientes, bloqueios e horários válidos calculados pela API.', current: false },
+  { phase: '03', name: 'Reserva ponta a ponta', summary: 'Agendar, listar e cancelar sem dupla reserva.', current: true },
   { phase: '04', name: 'Operação administrativa', summary: 'Painel, calendário e gestão da equipe.', current: false },
   { phase: '05', name: 'Qualidade e publicação', summary: 'Acessibilidade, testes E2E e deploy.', current: false },
 ];
@@ -57,7 +57,7 @@ function App() {
       <main id="inicio">
         <section className="hero section-wrap" id="visao">
           <div className="hero-copy">
-            <div className="eyebrow"><span className="pulse" /> EM DESENVOLVIMENTO <span className="eyebrow-separator">/</span> FASE 02</div>
+            <div className="eyebrow"><span className="pulse" /> EM DESENVOLVIMENTO <span className="eyebrow-separator">/</span> FASE 03</div>
             <h1>O próximo horário.<br/><em>Uma experiência melhor.</em></h1>
             <p>Uma plataforma de agendamentos planejada para simplificar a rotina de clientes e equipes. Construída por etapas, com arquitetura clara e validações no servidor.</p>
             <div className="hero-actions">
@@ -81,7 +81,7 @@ function App() {
             <div className="preview-content">
               <div className="preview-label">SEU ESPAÇO DE TEMPO</div>
               <div className="preview-title">Uma semana organizada.</div>
-              <div className="preview-summary">A estrutura visual é ilustrativa. Os horários disponíveis são calculados na Fase 2, mas as reservas entram na Fase 3.</div>
+              <div className="preview-summary">A estrutura visual é ilustrativa. O calendário ilustrativo apresenta o conceito visual; reservas reais funcionam na seção Agendamentos abaixo.</div>
               <div className="preview-week">
                 {[
                   { day: 'SEG', date: '23', busy: false },

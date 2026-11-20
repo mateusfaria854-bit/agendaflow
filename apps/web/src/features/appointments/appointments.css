@@ -1,0 +1,21 @@
+.af-bookings{margin-top:26px;padding:31px;border:1px solid #2a4b55;background:#102630;border-radius:17px}
+.af-bookings-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:25px}
+.af-bookings-head h3{font:800 clamp(21px,2.5vw,29px) Manrope,sans-serif;color:#effbf9;letter-spacing:-.7px;margin:13px 0 0}
+.af-bookings-head p{max-width:330px;font-size:12px;line-height:1.6;color:#97b3bb;margin:0}
+.af-bookings-list{display:flex;flex-direction:column;gap:10px}
+.af-booking-card{display:flex;align-items:center;gap:22px;justify-content:space-between;background:#0a1e27;border:1px solid #2c4c56;border-radius:11px;padding:20px}
+.af-booking-date{min-width:175px;display:flex;flex-direction:column;gap:8px}
+.af-booking-date>span{font:700 13px Manrope,sans-serif;color:#d6f3eb}
+.af-booking-date small{font:700 10px 'DM Sans',sans-serif;text-transform:uppercase;letter-spacing:.6px;color:#71dec5}
+.af-booking-info{flex:1;min-width:0}.af-booking-info h4{color:#e7f4f7;font:700 14px Manrope,sans-serif;margin:0 0 7px}
+.af-booking-info p{color:#8dabb3;font-size:12px;margin:0 0 7px}.af-booking-info small{color:#6f919d;font-size:11px}
+.af-booking-card>button{background:transparent;color:#e2bbc3;border:1px solid #72535d;border-radius:8px;cursor:pointer;padding:11px 16px;white-space:nowrap;font:700 12px 'DM Sans',sans-serif}
+.af-booking-card>button:hover:not(:disabled){border-color:#eca2b1;background:#3c2733}
+.af-booking-card>button:disabled{opacity:.6;cursor:not-allowed}
+.af-bookings-muted,.af-bookings-empty{font-size:12px;color:#8cabb4;line-height:1.7;margin:20px 0 0}
+.af-bookings-empty{padding:24px;background:#0c202a;border-radius:10px}
+.af-bookings-error,.af-bookings-ok{border-radius:9px;padding:13px 16px;font-size:12px;line-height:1.6}
+.af-bookings-error{color:#ffb7c0;background:#462c32;border:1px solid #73535a}
+.af-bookings-ok{color:#adf2db;background:#183a36;border:1px solid #397b6b}
+@media(max-width:850px){.af-bookings-head{flex-direction:column;align-items:flex-start}.af-booking-card{flex-wrap:wrap}.af-booking-date{min-width:135px}}
+@media(max-width:650px){.af-bookings{padding:21px}.af-booking-card{flex-direction:column;align-items:flex-start;gap:12px}.af-booking-date{min-width:0}}

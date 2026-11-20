@@ -20,4 +20,4 @@ Dados de demonstração são sempre sintéticos. O sistema não realiza pagament
 ## Contribuição
 Novas funcionalidades devem ter especificação, plano e tarefas antes do código. Mudanças de escopo precisam atualizar os testes e a documentação relacionada.
 
-**Fase 1:** implementada. **Fase 2:** expediente semanal, pausas, bloqueios e cálculo de horários disponíveis. **Próxima etapa:** Fase 3, criar, listar e cancelar reservas reais com revalidação transacional.
+**Fase 1:** implementada. **Fase 2:** expediente semanal, pausas, bloqueios e cálculo de horários disponíveis. **Fase 3:** criação, consulta e cancelamento de reservas reais, com revalidação transacional e concorrência protegida. **Próxima etapa:** Fase 4, painel administrativo e calendário operacional.

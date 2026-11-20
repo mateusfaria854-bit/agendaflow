@@ -33,3 +33,14 @@
 @media(max-width:1150px){.af-availability-form{grid-template-columns:repeat(2,minmax(0,1fr))}.af-slots{grid-template-columns:repeat(6,minmax(0,1fr))}}
 @media(max-width:850px){.af-admin-availability-grid{grid-template-columns:1fr}.af-slots{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:680px){.af-availability,.af-admin-availability{padding:20px}.af-availability-head{flex-direction:column;align-items:flex-start;gap:15px}.af-availability-form{grid-template-columns:1fr}.af-slots{grid-template-columns:repeat(3,minmax(0,1fr))}.af-slot-head{align-items:flex-start;flex-direction:column}.af-config-card{padding:16px}.af-window{grid-template-columns:1fr 1fr auto}.af-window select{grid-column:1/-1}.af-form-actions{flex-direction:column}}
+
+/* Fase 3: seleção de horários e confirmação de reserva */
+.af-availability .af-booking-slot{border:1px solid #4a7a70;background:#173e35;color:#c9fff1;min-height:63px;display:flex;align-items:center;flex-direction:column;justify-content:center;border-radius:9px;font:800 14px Manrope,sans-serif}
+.af-availability .af-booking-slot small{display:block;color:#a4d8c9;font:500 10px 'DM Sans',sans-serif;margin-top:5px}
+.af-availability .af-booking-slot:hover:not(:disabled){border-color:#b5f7e4;background:#23554a}
+.af-availability .af-booking-slot-selected{border-color:#97f9e1!important;box-shadow:0 0 0 2px #67d8c055;background:#2c6758!important}
+.af-booking-confirm{border:1px solid #41796e;background:#153b35;padding:20px;border-radius:11px;margin-top:22px;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.af-booking-confirm p{font-size:12px;line-height:1.7;color:#c8e8e0;margin:0}
+.af-booking-confirm button{white-space:nowrap}
+.af-booking-notice{background:#183e36;border:1px solid #43856f;color:#b9f4df;font-size:12px;padding:13px 16px;border-radius:10px;margin-top:16px}
+@media(max-width:670px){.af-booking-confirm{flex-direction:column;align-items:stretch}}

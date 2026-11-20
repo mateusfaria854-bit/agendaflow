@@ -2,7 +2,7 @@
 
 ## Visão geral
 
-O produto será desenvolvido incrementalmente para um único negócio de serviços. A Fase 0 preparou a infraestrutura e os dados. A Fase 1 inclui cadastro/login e catálogo com persistência no PostgreSQL. A Fase 2 implementa jornada semanal, bloqueios e cálculo de horários disponíveis no backend. A criação de reservas reais permanece para a Fase 3.
+O produto será desenvolvido incrementalmente para um único negócio de serviços. A Fase 0 preparou a infraestrutura e os dados. A Fase 1 inclui cadastro/login e catálogo com persistência no PostgreSQL. A Fase 2 implementa jornada semanal, bloqueios e cálculo de horários disponíveis no backend. A Fase 3 transforma esses slots em reservas confirmadas, com consulta e cancelamento pelo próprio cliente.
 
 ```text
 React + TypeScript (apps/web)
@@ -63,7 +63,7 @@ O teste `db:verify` tenta inserir reservas concorrentes sobrepostas e exige o er
 | `GET /api/v1/health` | `200 {status:"ok",service:"agendaflow-api",version:"0.1.0"}` | Não |
 | `GET /api/v1/ready` | `200 {status:"ready"}` ou `503 {status:"unavailable"}` | Sim |
 
-Na Fase 1 foram adicionados `/api/v1/auth/register`, `login`, `me`, `logout`, `/api/v1/services`, `/professionals` e consultas administrativas. Mutações exigem ADMIN, e o primeiro administrador é criado por comando local explícito. A Fase 2 adiciona `/api/v1/availability/slots` e rotas administrativas de jornada e bloqueios. Ainda não existem endpoints de criação de reserva.
+Na Fase 1 foram adicionados `/api/v1/auth/register`, `login`, `me`, `logout`, `/api/v1/services`, `/professionals` e consultas administrativas. Mutações exigem ADMIN, e o primeiro administrador é criado por comando local explícito. A Fase 2 adiciona `/api/v1/availability/slots` e rotas administrativas de jornada e bloqueios. A Fase 3 adiciona `POST /appointments`, `GET /appointments/mine` e `PATCH /appointments/:id/cancel`.
 
 ## Evolução planejada
 
@@ -86,3 +86,11 @@ Decisão de segurança: [ADR 0002](adr/0002-sessoes-opacas.md).
 As rotas administrativas permitem substituir períodos de jornada (sem sobreposições) e registrar/remover bloqueios excepcionais, com verificação de autorização. Mudanças de expediente com reservas futuras são recusadas até a política de reagendamento da Fase 3.
 
 **Fuso**: variável de ambiente `BUSINESS_TIMEZONE` com identificador IANA; padrão `America/Sao_Paulo`. As respostas usam timestamps ISO UTC e offset do horário local para desambiguar mudanças de horário de verão. Consulte [ADR 0003](adr/0003-disponibilidade-fuso.md).
+
+## Reservas e consistência (Fase 3)
+
+As rotas em `apps/api/src/modules/appointments/` exigem sessão CLIENTE. O POST aceita somente profissional, serviço e timestamp UTC de início. Preço, duração, término e status vêm da API e PostgreSQL.
+
+A transação usa `FOR UPDATE` na linha do profissional, mesma trava utilizada na Fase 2 para editar expediente e bloqueios. Depois de adquirir a trava, recalcula os slots com as informações atualizadas, recusando início que não corresponda exatamente a um horário livre. O banco mantém a restrição EXCLUDE gist para impedir sobreposições de reservas ativas.
+
+A listagem filtra por `client_id`, com até 50 reservas mais recentes. O cancelamento usa UPDATE condicional de status e data, preserva o histórico e recusa acesso de outro cliente com 404. Auditoria de criação e cancelamento é gravada na mesma transação. Consulte [ADR 0004](adr/0004-reservas-transacionais.md).
