@@ -3,7 +3,7 @@
 ## Objetivo
 Evitar o acúmulo de contas e reservas fictícias no ambiente público de portfólio, sem alterar dados reais ou apagar agendas ativas.
 
-## Regras e critérios de aceite
+## Requisitos
 - Somente quando a instância estiver em DEMO_MODE=true.
 - Execução padrão é **simulação sem escrita**; a execução real exige duas confirmações técnicas: DEMO_MAINTENANCE_ENABLED=true e o parâmetro --execute.
 - Conta elegível: papel CLIENTE, e-mail no domínio reservado @example.invalid, criada há pelo menos 30 dias, sem reserva recente/futura, sem sessão recente/ativa e sem auditoria recente. ADMIN e PROFISSIONAL nunca são eliminados.
@@ -25,3 +25,11 @@ Evitar o acúmulo de contas e reservas fictícias no ambiente público de portf�
 - [x] Criar testes de segurança e idempotência.
 - [ ] Validar backups automáticos e restauração do banco específico da Railway.
 - [ ] Habilitar agendamento do expurgo apenas após essa validação.
+
+## Critérios de aceitação
+
+- Modo de simulação informa contagens, sem alterar o banco.
+- Uma conta CLIENTE fictícia antiga é eliminada junto com suas dependências se estiver inativa.
+- ADMIN, PROFISSIONAL, usuários recentes e usuários com sessão ativa permanecem intactos.
+- A segunda execução não causa exclusões adicionais e a rotina falha fechada fora do modo demo.
+- O agendamento de exclusões na Railway permanece desligado até existir backup real testado.
