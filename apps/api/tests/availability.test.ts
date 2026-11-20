@@ -79,6 +79,10 @@ test('Fase 2: validações, horários, bloqueios, autorização e reservas', {sk
       url:`${base}/availability/slots?professionalId=${professionalId}&serviceId=${serviceId}&date=2035-02-30`});
     assert.equal(invalidDate.statusCode,400);
 
+    const invalidBlockDate=await app.inject({method:'POST',url:base+'/admin/blocked-periods',
+      headers:{cookie:adminCookie},
+      payload:{professionalId,startsAt:'2035-02-30T10:00:00Z',endsAt:'2035-03-01T11:00:00Z'}});
+    assert.equal(invalidBlockDate.statusCode,400);
     const blocked=await app.inject({method:'POST',url:base+'/admin/blocked-periods',
       headers:{cookie:adminCookie},
       payload:{professionalId,startsAt:`${date}T10:00:00-03:00`,

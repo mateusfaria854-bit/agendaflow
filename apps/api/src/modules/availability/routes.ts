@@ -36,7 +36,7 @@ export function businessTimeZone(): string {
 }
 
 function parseTimestamp(value:string): number {
-  if (!timestampPattern.test(value)) throw new Error('Data/hora exige ISO 8601 com fuso, como 2035-01-01T14:00:00Z.');
+  if (!timestampPattern.test(value) || !validDate(value.slice(0,10))) throw new Error('Data/hora exige ISO 8601 com fuso, como 2035-01-01T14:00:00Z.');
   const parsed=Date.parse(value);
   if (!Number.isFinite(parsed)) throw new Error('Data/hora inválida.');
   return parsed;
