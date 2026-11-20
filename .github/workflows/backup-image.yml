@@ -23,6 +23,14 @@ jobs:
           grep -Fq 'pg_restore' ops/backup/backup.sh
           grep -Fq 'head-object' ops/backup/backup.sh
           grep -Fq 'INSERT INTO backup_verifications' ops/backup/backup.sh
+      - name: Testar retenção com inventário fictício, sem acesso S3
+        run: |
+          python3 -m unittest discover -s ops/backup -p 'test_retention.py' -v
+          python3 -m py_compile ops/backup/retention.py
+          if grep -E 'aws[^#]*delete-object|aws[^#]*delete-objects' ops/backup/retention.py; then
+            echo "Este utilitário não pode incluir comandos de exclusão S3." >&2
+            exit 1
+          fi
       - name: Compilar imagem isolada com cliente PostgreSQL e S3
         run: docker build -f ops/backup/Dockerfile -t agendaflow-dbbackup:check .
       - name: Garantir que modo sem configuracao falha fechado

@@ -90,3 +90,10 @@ SET verified_at=excluded.verified_at,
     sha256=excluded.sha256;
 SQL
 echo "Backup confirmado no bucket privado, recuperado e registrado no monitor. Bytes: $localSize"
+
+# Inventário SOMENTE LEITURA, após concluir o backup com sucesso.
+# Se falhar, não reclassificar a cópia válida como backup fracassado.
+echo "Simulando política de retenção sem excluir qualquer arquivo..."
+if ! python3 /usr/local/bin/agendaflow-retention-preview.py; then
+  echo "Aviso: inventário de retenção indisponível ou bloqueado; nenhuma cópia foi excluída." >&2
+fi
