@@ -6,7 +6,7 @@
 
 **Plataforma full-stack de agendamentos** em desenvolvimento, com React, TypeScript, Node.js, Fastify e PostgreSQL. O projeto segue **Spec-Driven Development (SDD)** e prioriza uma arquitetura clara, requisitos verificáveis e prevenção de reservas duplicadas.
 
-> **Estado atual: MVP full-stack com build Docker de demonstração.** Clientes reservam e cancelam, administradores gerenciam a agenda e profissionais consultam seus atendimentos. API Fastify e frontend React podem ser executados **na mesma origem HTTP/HTTPS**, com Docker, CI e E2E. **Ainda não existe deploy público validado:** faltam conectar um provedor e provisionar PostgreSQL/HTTPS, monitoramento e limites operacionais. Use somente dados fictícios.
+> **Estado atual: MVP full-stack com build Docker de demonstração.** Clientes reservam e cancelam, administradores gerenciam a agenda e profissionais consultam seus atendimentos. API Fastify e frontend React podem ser executados **na mesma origem HTTP/HTTPS**, com Docker, CI e E2E. **Demo hospedada e verificada externamente em HTTPS:** o frontend/API e PostgreSQL estão online na Railway, com smoke test periódico de disponibilidade. **Somente dados fictícios:** permanecem pendentes proteção contra abuso mais robusta, backup e restauração testados, retenção/limpeza de dados e monitoramento operacional completo.
 
 ## Objetivo
 
@@ -160,11 +160,13 @@ A imagem exige `DATABASE_URL` de um PostgreSQL separado e, por segurança, `WEB_
 
 Para uma demo aberta, configure `DEMO_MODE=true` no serviço: cadastros aceitam apenas endereços **fictícios @example.invalid**. Isso evita e-mails reais, mas ainda são necessários limites contra abuso, limpeza periódica do banco e monitoramento.
 
-[Guia passo a passo para Railway e outros provedores](docs/DEPLOY_DEMO.md). **Não** há link de aplicação pública até a implantação e verificação efetivas.
+[Guia passo a passo para Railway e outros provedores](docs/DEPLOY_DEMO.md). A demonstração foi implantada e passou na checagem externa HTTPS em 20/11/2026. Evite inserir dados pessoais, senhas reutilizadas ou clientes reais.
 
 ### Publicação demonstrativa
 
-Uma instância de demonstração foi **implantada na Railway em 20/11/2026** (`agendaflow-demo`, ambiente `production`): serviço web React/Fastify, PostgreSQL privado com volume, migrações e seed fictício executados pelo comando `npm run db:demo:bootstrap`, e healthcheck `/api/v1/ready` aprovado pela Railway. O domínio HTTPS gerenciado foi provisionado, porém a verificação externa independente do acesso público ainda está pendente; por isso, o endereço não é divulgado aqui como demo validada. A implantação segue `main` e usa `DEMO_MODE=true` para restringir cadastro a `@example.invalid`. O documento [Implantação demonstrativa](docs/DEPLOY_DEMO.md) cobre operação, backup e rollback. **Não usar dados reais:** faltam medidas completas contra abuso, monitoramento externo, política de retenção/expurgo, backup testado e revisão LGPD. Pagamentos, notificações e recuperação de senha não fazem parte do MVP.
+Uma instância de demonstração foi **implantada na Railway em 20/11/2026** (`agendaflow-demo`, ambiente `production`): serviço web React/Fastify, PostgreSQL privado com volume, migrações e seed fictício executados pelo comando `npm run db:demo:bootstrap`, e healthcheck `/api/v1/ready` aprovado. O domínio HTTPS [AgendaFlow Demo](https://agendaflow-web-production.up.railway.app/) teve **DNS, TLS, frontend, API e conexão com PostgreSQL verificados externamente** pelo workflow [Disponibilidade da demo HTTPS](.github/workflows/demo-uptime.yml), executado no GitHub Actions e agendado a cada 6 horas.
+
+A implantação segue a branch `main` e usa `DEMO_MODE=true`, que restringe cadastros públicos a e-mails **fictícios** `@example.invalid`. Uma URL pública **não significa produção comercial pronta**: faltam proteção contra abuso distribuído, política de retenção/expurgo, backup e restauração testados, observabilidade completa e revisão LGPD. **Não cadastrar clientes reais, nem usar senhas pessoais.** Pagamentos, notificações e recuperação de senha não fazem parte do MVP. Consulte o [Guia de implantação](docs/DEPLOY_DEMO.md) para operação, backup e rollback.
 
 ## Testes e verificações
 
@@ -185,7 +187,7 @@ Especificações implementadas: [Fundação](specs/000-fundacao/spec.md), [Auten
 
 ## Próximas fases
 
-Confira o [Roadmap](docs/ROADMAP.md) e as [Issues planejadas](https://github.com/mateusfaria854-bit/agendaflow/issues). O planejamento contempla identidade, catálogo, disponibilidade, reservas, operação administrativa, testes E2E e publicação demonstrativa. O deploy não é automático e ainda depende de infraestrutura.
+Confira o [Roadmap](docs/ROADMAP.md) e as [Issues planejadas](https://github.com/mateusfaria854-bit/agendaflow/issues). O planejamento contempla identidade, catálogo, disponibilidade, reservas, operação administrativa, testes E2E e publicação demonstrativa. A demonstração online segue o repositório GitHub na Railway; alterações só devem ser divulgadas após a confirmação dos testes e do deploy. A produção com dados reais exige controles de segurança e operação adicionais.
 
 ## Segurança e escopo
 
