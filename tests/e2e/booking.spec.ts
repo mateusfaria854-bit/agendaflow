@@ -58,6 +58,8 @@ test('cliente reserva e cancela no navegador, sem reservas duplicadas',async({pa
   await expect(own.getByText('Corte clássico')).toBeVisible();
   const response=await page.request.get('/api/v1/admin/appointments?from=2026-11-01&to=2026-11-01');
   expect(response.status()).toBe(403);
+  await page.getByRole('button',{name:'Sair da conta'}).click();
+  await expect(page.getByRole('heading',{name:'Seu espaço começa aqui.'})).toBeVisible();
 });
 
 test('área de autenticação aceita navegação por teclado e passa verificações WCAG',async({page})=>{
