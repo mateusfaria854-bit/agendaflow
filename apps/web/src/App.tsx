@@ -16,8 +16,8 @@ const roadmap = [
   { phase: '00', name: 'Fundação técnica', summary: 'Monorepo, API, React, PostgreSQL, testes e SDD.', current: false },
   { phase: '01', name: 'Identidade e catálogo', summary: 'Cadastro, login, serviços e profissionais conectados à API.', current: false },
   { phase: '02', name: 'Agenda disponível', summary: 'Expedientes, bloqueios e horários válidos calculados pela API.', current: false },
-  { phase: '03', name: 'Reserva ponta a ponta', summary: 'Agendar, listar e cancelar sem dupla reserva.', current: true },
-  { phase: '04', name: 'Operação administrativa', summary: 'Painel, calendário e gestão da equipe.', current: false },
+  { phase: '03', name: 'Reserva ponta a ponta', summary: 'Agendar, listar e cancelar sem dupla reserva.', current: false },
+  { phase: '04', name: 'Operação administrativa', summary: 'Calendário, filtros, reserva manual e gestão de status.', current: true },
   { phase: '05', name: 'Qualidade e publicação', summary: 'Acessibilidade, testes E2E e deploy.', current: false },
 ];
 
@@ -57,7 +57,7 @@ function App() {
       <main id="inicio">
         <section className="hero section-wrap" id="visao">
           <div className="hero-copy">
-            <div className="eyebrow"><span className="pulse" /> EM DESENVOLVIMENTO <span className="eyebrow-separator">/</span> FASE 03</div>
+            <div className="eyebrow"><span className="pulse" /> EM DESENVOLVIMENTO <span className="eyebrow-separator">/</span> FASE 04</div>
             <h1>O próximo horário.<br/><em>Uma experiência melhor.</em></h1>
             <p>Uma plataforma de agendamentos planejada para simplificar a rotina de clientes e equipes. Construída por etapas, com arquitetura clara e validações no servidor.</p>
             <div className="hero-actions">

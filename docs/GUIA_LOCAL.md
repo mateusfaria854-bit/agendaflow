@@ -36,7 +36,7 @@ npm run dev:web
 - API: http://127.0.0.1:3333/api/v1/health
 - Readiness: http://127.0.0.1:3333/api/v1/ready
 
-O Vite encaminha `/api` para o servidor local. A tela inicial é uma prévia visual. Não existem reservas nem contas operacionais ainda.
+O Vite encaminha `/api` para o servidor local. A capa apresenta uma prévia visual conceitual, mas cadastro/login, catálogo, disponibilidade, reservas e painel administrativo já funcionam no ambiente local com PostgreSQL.
 
 ## Verificações
 
@@ -116,3 +116,25 @@ PATCH /api/v1/appointments/:id/cancel  Cookie de sessão CLIENTE titular
 ```
 
 O início deve ser um timestamp UTC ISO 8601 retornado na consulta de slots; preço, término e identidade do cliente não podem ser definidos no payload. **Não há pagamentos nem notificações automáticas.** Os testes de concorrência e autorização são executados pelo GitHub Actions com PostgreSQL descartável.
+
+## Fase 4: calendário e reservas manuais
+
+Entre com o usuário ADMIN. No fim do painel de administração, abra **Calendário de atendimentos**:
+
+- Filtre por início/fim de período de até 31 dias, profissional e status. A agenda apresenta até 100 resultados por página e botões para avançar.
+- Pesquise clientes existentes por nome/e-mail (mínimo três caracteres). Contas de cliente devem ser cadastradas pelo próprio cliente antes da reserva manual.
+- Escolha um serviço ativo, profissional habilitado e data; consulte os slots e confirme uma reserva manual em nome do cliente.
+- Confirme reservas PENDENTE futuras, cancele reservas ativas futuras ou conclua atendimentos CONFIRMADO somente após o término.
+
+As reservas manuais passam pela mesma validação transacional da reserva do cliente. Mudanças de estado deixam evento de auditoria. A pesquisa de clientes retorna dados pessoais **somente para ADMIN**; não use clientes reais em demonstrações públicas.
+
+Endpoints:
+
+```text
+GET   /api/v1/admin/appointments?from=YYYY-MM-DD&to=YYYY-MM-DD&professionalId=UUID&status=CONFIRMADO&offset=0
+GET   /api/v1/admin/clients?query=texto
+POST  /api/v1/admin/appointments
+PATCH /api/v1/admin/appointments/:id/status
+```
+
+Não há migração nova nesta fase; os dados já são suportados pelas tabelas `appointments` e `audit_events` iniciais. Os testes E2E de navegador, revisão de segurança final e deploy demonstrativo ficam para a Fase 5.

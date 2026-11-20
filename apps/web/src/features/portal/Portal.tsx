@@ -3,6 +3,7 @@ import {api} from '../../lib/api.js';
 import AvailabilityPanel from '../availability/AvailabilityPanel.js';
 import AvailabilityAdmin from '../availability/AvailabilityAdmin.js';
 import BookingsPanel from '../appointments/BookingsPanel.js';
+import AdminCalendar from '../admin/AdminCalendar.js';
 import './portal.css';
 
 type Role = 'CLIENTE' | 'PROFISSIONAL' | 'ADMIN';
@@ -243,6 +244,7 @@ export default function Portal(){
           </div>
         </div>
         <AvailabilityAdmin professionals={adminPros}/>
+        <AdminCalendar services={adminServices} professionals={adminPros} onChanged={updateBookings}/>
       </div>}
     </div>
   </section>;

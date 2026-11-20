@@ -2,7 +2,7 @@
 
 ## Visão geral
 
-O produto será desenvolvido incrementalmente para um único negócio de serviços. A Fase 0 preparou a infraestrutura e os dados. A Fase 1 inclui cadastro/login e catálogo com persistência no PostgreSQL. A Fase 2 implementa jornada semanal, bloqueios e cálculo de horários disponíveis no backend. A Fase 3 transforma esses slots em reservas confirmadas, com consulta e cancelamento pelo próprio cliente.
+O produto será desenvolvido incrementalmente para um único negócio de serviços. A Fase 0 preparou a infraestrutura e os dados. A Fase 1 inclui cadastro/login e catálogo com persistência no PostgreSQL. A Fase 2 implementa jornada semanal, bloqueios e cálculo de horários disponíveis no backend. A Fase 3 transforma esses slots em reservas confirmadas, com consulta e cancelamento pelo próprio cliente. A Fase 4 oferece o calendário administrativo com filtros, reserva manual e mudança auditada de status.
 
 ```text
 React + TypeScript (apps/web)
@@ -54,7 +54,7 @@ O verificador `scripts/arch-check.mjs` impede dependências básicas incompatív
 
 A migração `0001_initial.sql` cria entidades de usuários, serviços, profissionais, relações N:N, disponibilidade, bloqueios, agendamentos e auditoria. A extensão `btree_gist` permite um `EXCLUDE USING gist` que impede, para o mesmo profissional, intervalos `[início,fim)` sobrepostos em estados `PENDENTE` e `CONFIRMADO`.
 
-O teste `db:verify` tenta inserir reservas concorrentes sobrepostas e exige o erro `23P01`; toda a transação é revertida. Validação de horário comercial, fuso, permissão e duração do serviço ainda precisa ser implementada nas fases seguintes.
+O teste `db:verify` tenta inserir reservas concorrentes sobrepostas e exige o erro `23P01`; toda a transação é revertida. Validação de horário comercial, fuso, permissão e duração do serviço foi implementada nas Fases 2 e 3 e é reutilizada nas reservas administrativas da Fase 4.
 
 ## API da Fase 0
 
@@ -67,7 +67,7 @@ Na Fase 1 foram adicionados `/api/v1/auth/register`, `login`, `me`, `logout`, `/
 
 ## Evolução planejada
 
-A cada funcionalidade: especificação `spec.md`, plano `plan.md`, tarefas `tasks.md`, testes, PR e CI. A próxima entrega contempla o fluxo completo de criação e cancelamento de reservas com revalidação transacional. APIs serão organizadas por funcionalidade conforme o domínio ganhar comportamento, sem classes ou camadas fictícias antecipadas.
+A cada funcionalidade: especificação `spec.md`, plano `plan.md`, tarefas `tasks.md`, testes, PR e CI. A próxima entrega contempla a revisão de segurança, acessibilidade, testes ponta a ponta em navegador e publicação demonstrativa (Fase 5). APIs serão organizadas por funcionalidade conforme o domínio ganhar comportamento, sem classes ou camadas fictícias antecipadas.
 
 ## Sessões e segurança (Fase 1)
 
@@ -94,3 +94,11 @@ As rotas em `apps/api/src/modules/appointments/` exigem sessão CLIENTE. O POST 
 A transação usa `FOR UPDATE` na linha do profissional, mesma trava utilizada na Fase 2 para editar expediente e bloqueios. Depois de adquirir a trava, recalcula os slots com as informações atualizadas, recusando início que não corresponda exatamente a um horário livre. O banco mantém a restrição EXCLUDE gist para impedir sobreposições de reservas ativas.
 
 A listagem filtra por `client_id`, com até 50 reservas mais recentes. O cancelamento usa UPDATE condicional de status e data, preserva o histórico e recusa acesso de outro cliente com 404. Auditoria de criação e cancelamento é gravada na mesma transação. Consulte [ADR 0004](adr/0004-reservas-transacionais.md).
+
+## Calendário e operação administrativa (Fase 4)
+
+O módulo `apps/api/src/modules/admin/routes.ts` oferece listagem filtrada por período (máximo 31 dias civis no fuso do negócio), profissional e status, com paginação de 100 registros, totais e pesquisa controlada de clientes. Nome/e-mail do cliente são retornados exclusivamente sob autorização ADMIN.
+
+`apps/api/src/modules/appointments/service.ts` centraliza o serviço de criação de reserva usado por clientes e administradores. Lock pessimista do profissional, consulta atualizada de slots e exclusão SQL continuam obrigatórios. Nenhuma rota pode informar preço ou duração pelo frontend.
+
+Alterações de estado seguem PENDENTE → CONFIRMADO futuro, ativo → CANCELADO futuro, CONFIRMADO → CONCLUIDO após término. Mudança de status e registro em `audit_events` são atômicos. Veja o [ADR 0005](adr/0005-calendario-admin.md) e as especificações da [Fase 4](../specs/005-operacao-administrativa/spec.md).

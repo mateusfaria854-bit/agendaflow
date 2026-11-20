@@ -6,6 +6,7 @@ import { checkWriteOrigin } from './modules/auth/session.js';
 import { catalogRoutes } from './modules/catalog/routes.js';
 import { availabilityRoutes } from './modules/availability/routes.js';
 import {appointmentRoutes} from './modules/appointments/routes.js';
+import {adminAppointmentRoutes} from './modules/admin/routes.js';
 
 type Options = { databaseCheck?: () => Promise<boolean>; logger?: boolean };
 
@@ -36,8 +37,9 @@ export function createApp(options: Options = {}) {
   app.register(catalogRoutes, {prefix:'/api/v1'});
   app.register(availabilityRoutes, {prefix:'/api/v1'});
   app.register(appointmentRoutes, {prefix:'/api/v1'});
+  app.register(adminAppointmentRoutes, {prefix:'/api/v1'});
 
-  app.get('/', async() => ({name:APP_NAME,phase:3}));
+  app.get('/', async() => ({name:APP_NAME,phase:4}));
   app.setErrorHandler((error,_request,reply) => {
     const err = error as { statusCode?: number; message?: string };
     const status = err.statusCode && err.statusCode >= 400 && err.statusCode < 500
