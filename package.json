@@ -21,6 +21,7 @@
     "db:seed": "npm run db:seed -w @agendaflow/api",
     "db:verify": "npm run db:verify -w @agendaflow/api",
     "admin:create": "npm run admin:create -w @agendaflow/api",
+    "staff:provision": "npm run staff:provision -w @agendaflow/api",
     "check": "npm run spec:check && npm run arch:check && npm run build && npm test"
   },
   "license": "UNLICENSED"

@@ -39,6 +39,7 @@ async function assignServices(client: PoolClient, professionalId: string, servic
 async function listProfessionals(includeInactive: boolean) {
   const result = await database().query(
     `SELECT p.id,p.name,p.active,
+      ${includeInactive ? 'p.user_id IS NOT NULL AS "hasAccount",' : ''}
       COALESCE(json_agg(json_build_object('id',s.id,'name',s.name,'active',s.active) ORDER BY s.name)
         FILTER (WHERE s.id IS NOT NULL ${includeInactive ? '' : 'AND s.active=true'}), '[]'::json) AS services
       FROM professionals p
