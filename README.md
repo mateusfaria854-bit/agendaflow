@@ -4,14 +4,36 @@
 [![Navegador E2E](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/e2e.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/e2e.yml)
 [![Contêiner de demonstração](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/container-demo.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/container-demo.yml)
 [![Disponibilidade HTTPS](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/demo-uptime.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/demo-uptime.yml)
+[![Capturas reais](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/readme-media.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/readme-media.yml)
+[![Backup e restauração](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/backup-restore.yml/badge.svg)](https://github.com/mateusfaria854-bit/agendaflow/actions/workflows/backup-restore.yml)
 
 **Plataforma full-stack de agendamentos** em desenvolvimento, com React, TypeScript, Node.js, Fastify e PostgreSQL. O projeto segue **Spec-Driven Development (SDD)** e prioriza uma arquitetura clara, requisitos verificáveis e prevenção de reservas duplicadas.
 
-> **Estado atual: MVP full-stack com build Docker de demonstração.** Clientes reservam e cancelam, administradores gerenciam a agenda e profissionais consultam seus atendimentos. API Fastify e frontend React podem ser executados **na mesma origem HTTP/HTTPS**, com Docker, CI e E2E. **Demo hospedada e verificada externamente em HTTPS:** o frontend/API e PostgreSQL estão online na Railway, com smoke test periódico de disponibilidade. **Somente dados fictícios:** permanecem pendentes proteção contra abuso mais robusta, backup e restauração testados, retenção/limpeza de dados e monitoramento operacional completo.
+> **Estado atual: MVP full-stack com demonstração online na Railway.** Clientes reservam e cancelam, administradores gerenciam a agenda e profissionais consultam seus atendimentos. API Fastify e frontend React podem ser executados **na mesma origem HTTP/HTTPS**, com Docker, CI e E2E. **Demo hospedada e verificada externamente em HTTPS:** o frontend/API e PostgreSQL estão online na Railway, com smoke test periódico de disponibilidade. **Somente dados fictícios:** permanecem pendentes proteção contra abuso mais robusta, backup e restauração testados, retenção/limpeza de dados e monitoramento operacional completo.
+
+## Demonstração
+
+> Capturas **reais da interface em execução**, produzidas com Playwright e PostgreSQL **descartável**, utilizando apenas contas e agendamentos fictícios. A prévia de calendário no banner da página inicial é conceitual; as telas de catálogo, consulta de horários, reservas e administração abaixo são funcionais.
+
+### Agendamento de ponta a ponta (GIF)
+
+[![Demonstração animada do fluxo de agendamento do AgendaFlow](docs/media/fluxo-agendamento.gif)](https://agendaflow-web-production.up.railway.app/)
+
+### Telas do sistema
+
+| Página inicial | Catálogo de serviços | Horários disponíveis |
+| :---: | :---: | :---: |
+| ![Tela inicial do AgendaFlow](docs/media/01-inicio.jpg) | ![Catálogo de serviços com cadastro e login](docs/media/02-catalogo.jpg) | ![Seleção de data, profissional e horários livres](docs/media/03-horarios.jpg) |
+
+| Meus agendamentos | Calendário administrativo | Versão mobile |
+| :---: | :---: | :---: |
+| ![Agendamentos de cliente fictício](docs/media/04-minhas-reservas.jpg) | ![Painel de agenda do administrador com dados fictícios](docs/media/05-admin.jpg) | <img alt="Visualização do AgendaFlow em dispositivo móvel" src="docs/media/06-mobile.jpg" width="190" /> |
+
+**Testar online:** [AgendaFlow na Railway](https://agendaflow-web-production.up.railway.app/) · **Atualizar os registros visuais:** [workflow de capturas Playwright](.github/workflows/readme-media.yml). As imagens são geradas no ambiente de testes, não por dados de visitantes reais.
 
 ## Objetivo
 
-Organizar serviços, profissionais e horários para um único negócio de atendimentos. O MVP permitirá reservar, consultar e cancelar agendamentos, com validação de conflito no backend e no PostgreSQL. Nesta etapa já é possível cadastrar usuários e administrar serviços e profissionais.
+Organizar serviços, profissionais e horários para um único negócio de atendimentos. O MVP permite reservar, consultar e cancelar agendamentos, com validação de conflito no backend e no PostgreSQL. Nesta etapa já é possível cadastrar usuários e administrar serviços e profissionais.
 
 ## Tecnologias
 
@@ -44,6 +66,7 @@ specs/
   008-demo-hospedagem/        Docker e configuração para hospedar
   _templates/           Modelos de spec, plan e tasks
 docs/
+  media/                Prints reais e GIF do sistema
   ARQUITETURA.md        Limites e fluxo entre camadas
   GUIA_LOCAL.md         Instalação e execução
   ROADMAP.md            Fases do MVP
@@ -97,7 +120,7 @@ Instruções detalhadas: [Guia local](docs/GUIA_LOCAL.md).
 - **Área profissional (complemento da Fase 4):** acesso pessoal à própria agenda, filtros de data/status, paginação e proteção contra consulta de outros profissionais, sem e-mail de cliente ou dados financeiros.
 - **Qualidade (Fase 5):** testes Playwright Chromium desktop/mobile, verificação básica WCAG com axe, skip link, movimento reduzido, headers HTTP de segurança e guia de deploy seguro.
 
-O primeiro administrador é criado pelo comando local `npm run admin:create`; uma conta profissional é provisionada com `npm run staff:provision` e vinculada a um profissional previamente cadastrado. Nenhum desses comandos possui credenciais padrão. Consulte o [Guia local](docs/GUIA_LOCAL.md) para configurar as variáveis temporárias e usar o painel. **O sistema já permite agendamentos reais no ambiente local, sem integração de pagamentos ou envio de notificações.**
+O primeiro administrador é criado pelo comando local `npm run admin:create`; uma conta profissional é provisionada com `npm run staff:provision` e vinculada a um profissional previamente cadastrado. Nenhum desses comandos possui credenciais padrão. Consulte o [Guia local](docs/GUIA_LOCAL.md) para configurar as variáveis temporárias e usar o painel. **A aplicação permite agendamentos no ambiente local e na demonstração com dados fictícios; não há integração de pagamentos nem envio de notificações.**
 
 ### Endpoints atuais
 
@@ -132,7 +155,7 @@ O primeiro administrador é criado pelo comando local `npm run admin:create`; um
 4. Em **Agendar para um cliente**, pesquise um CLIENTE cadastrado, escolha serviço/profissional/data e confirme um horário disponível.
 5. Use **Cancelar** em reservas futuras e **Concluir** somente após o término do atendimento. A interface acompanha as restrições da API.
 
-A pesquisa de clientes e a lista de reservas são acessíveis apenas ao administrador. **Não há pagamentos, e-mails automáticos, deploy de produção nem testes E2E em navegador nesta fase.**
+A pesquisa de clientes e a lista de reservas são acessíveis apenas ao administrador. **Não há pagamentos nem e-mails automáticos; a aplicação demonstrativa está hospedada e os testes E2E são executados no GitHub Actions.**
 
 ### Como habilitar a área profissional
 
@@ -169,6 +192,10 @@ Uma instância de demonstração foi **implantada na Railway em 20/11/2026** (`a
 
 A implantação segue a branch `main` e usa `DEMO_MODE=true`, que restringe cadastros públicos a e-mails **fictícios** `@example.invalid`. Uma URL pública **não significa produção comercial pronta**: faltam proteção contra abuso distribuído, política de retenção/expurgo, backup e restauração testados, observabilidade completa e revisão LGPD. **Não cadastrar clientes reais, nem usar senhas pessoais.** Pagamentos, notificações e recuperação de senha não fazem parte do MVP. Consulte o [Guia de implantação](docs/DEPLOY_DEMO.md) para operação, backup e rollback.
 
+### Backup e restauração em ambiente de testes
+
+O workflow [Backup e restauração PostgreSQL](.github/workflows/backup-restore.yml) executa `pg_dump` e `pg_restore` com **dados sintéticos em banco isolado** e verifica tabelas, migrações e a restrição contra reservas sobrepostas. Esse teste foi aprovado, mas **não substitui** backups periódicos, seguros e restaurações testadas do banco da Railway.
+
 ## Testes e verificações
 
 ```bash
@@ -184,7 +211,7 @@ O CI [Qualidade e banco](.github/workflows/ci.yml) executa build, testes, verifi
 
 Cada funcionalidade tem três documentos versionados em `specs/NNN-nome/`: `spec.md` (requisitos e aceite), `plan.md` (arquitetura e dados), e `tasks.md` (execução e testes). O conjunto de princípios está em [specs/constitution.md](specs/constitution.md).
 
-Especificações implementadas: [Fundação](specs/000-fundacao/spec.md), [Autenticação](specs/001-autenticacao/spec.md), [Catálogo](specs/002-catalogo/spec.md), [Disponibilidade](specs/003-disponibilidade/spec.md), [Agendamentos](specs/004-agendamentos/spec.md) e [Operação administrativa](specs/005-operacao-administrativa/spec.md), incluindo o [complemento de área profissional](specs/006-area-profissional/spec.md) e a [Fase 5](specs/007-polimento-publicacao/spec.md), incluindo a [preparação de deploy Docker](specs/008-demo-hospedagem/spec.md). A publicação externa depende de ambiente autorizado e de verificações reais.
+Especificações implementadas: [Fundação](specs/000-fundacao/spec.md), [Autenticação](specs/001-autenticacao/spec.md), [Catálogo](specs/002-catalogo/spec.md), [Disponibilidade](specs/003-disponibilidade/spec.md), [Agendamentos](specs/004-agendamentos/spec.md) e [Operação administrativa](specs/005-operacao-administrativa/spec.md), incluindo o [complemento de área profissional](specs/006-area-profissional/spec.md) e a [Fase 5](specs/007-polimento-publicacao/spec.md), incluindo a [preparação de deploy Docker](specs/008-demo-hospedagem/spec.md). A demonstração externa foi implantada e verificada em HTTPS, mas a operação com dados reais depende de controles adicionais.
 
 ## Próximas fases
 
